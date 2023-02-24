@@ -1,0 +1,53 @@
+.arrow{
+    transition: transform .25s ease-in-out
+}
+.arrow:hover{
+    transform: rotate(180deg) scale(1.1,1.1);
+    cursor:pointer;
+    border-radius: 50%;
+    opacity: 0.9;
+     outline: none;
+}
+
+
+.click-button:hover{
+    opacity: 0.9;
+}
+
+.MuiSvgIcon-root{
+    color: #fff !important; 
+}
+
+.MuiInputBase-input{
+    color: #fff !important;
+    
+    text-align: right !important;
+}
+
+.MuiBox-root:hover .MuiFormControl-root{
+    
+    transform:scale(1.025,1.025) !important;
+}
+.Mui-disabled .MuiSelect-select{
+    color: #fff !important;
+}
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.MuiFab-default{
+    background-color: rgb(13, 13, 52) !important;
+    
+}
+
+.MuiFab-default .MuiSvgIcon-root{
+    color: white !important;
+    background: none !important;
+}
+
+.MuiFilledInput-input{
+    color:#000 !important;
+    text-align: start   !important;
+}

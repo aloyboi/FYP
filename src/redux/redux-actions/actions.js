@@ -1,0 +1,5 @@
+export const SET_ACCOUNT = "SET_ACCOUNT";
+
+export const SET_DEPOSIT_AMOUNT = "SET_DEPOSIT_AMOUNT";
+
+export const SET_TAB_VALUE = "SET_TAB_VALUE";
