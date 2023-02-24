@@ -22,35 +22,32 @@ import Dialog from "@mui/material/Dialog";
 import { useDispatch, useSelector } from "react-redux";
 import "./dex.css";
 import { marginTop } from "styled-system";
-
-//selector
-
-// const selectBuyTokens = (state) => state.token.buyTokens;
-// const selectSellTokens = (state) => state.token.sellTokens;
-// const selectMessage = (state) => state.message.message;
-// const selectAccount = (state) => state.provider.account;
+import { SET_BUY_SELL_TAB } from "../../redux/redux-actions/actions";
 
 const DexExchange = () => {
+    //Selectors
+    const buySellTokens = useSelector(
+        (state) => state.tabValue.buySellSelected
+    );
+    //const selectMessage = (state) => state.message.message;
+    const curr = useSelector((state) => state.account.address);
+
+    const [buySellSelected, setBuySellSelected] = useState(0);
     const [buySelected, setBuySelected] = useState(0);
     const [sellSelected, setSellSelected] = useState(0);
-    const [buyTextFieldError, setBuyTextFieldError] = useState(false);
-    const [buyTextFieldHtext, setBuyTextFieldHtext] = useState("");
-    const [sellTextFieldError, setSellTextFieldError] = useState(false);
-    const [sellTextFieldHtext, setSellTextFieldHtext] = useState("");
+    // const [buyTextFieldError, setBuyTextFieldError] = useState(false);
+    // const [buyTextFieldHtext, setBuyTextFieldHtext] = useState("");
+    // const [sellTextFieldError, setSellTextFieldError] = useState(false);
+    // const [sellTextFieldHtext, setSellTextFieldHtext] = useState("");
 
-    const [buyAmount, setBuyAmount] = useState(1);
-    const [sellAmount, setSellAmount] = useState(1);
-    const [rate, setRate] = useState(1);
-    const [tabValue, setTabValue] = useState(0);
+    const [buyAmount, setBuyAmount] = useState(0);
+    const [sellAmount, setSellAmount] = useState(0);
+    const [rate, setRate] = useState(0);
     //true = controlling sell rate
     const [rateState, setRateState] = useState(false);
     const [buyBalance, setBuyBalance] = useState(0);
     const [sellBalance, setSellBalance] = useState(0);
     const dispatch = useDispatch();
-    // const buyTokens = useSelector(selectBuyTokens);
-    // const sellTokens = useSelector(selectSellTokens);
-    // const message = useSelector(selectMessage);
-    // const account = useSelector(selectAccount);
 
     const [open, setOpen] = React.useState(false);
     const [newTokenAddress, setNewTokenAddress] = React.useState("");
@@ -61,34 +58,35 @@ const DexExchange = () => {
     //     return num.toString().match(re)[0];
     // }
 
-    // const handleBuySelectChange = (event) => {
-    //     setBuySelected(event.target.value);
-    //     checkEqual("buy", event.target.value);
-    // };
+    const handleBuySelectChange = (event) => {
+        setBuySelected(event.target.value);
+        checkEqual("buy", event.target.value);
+    };
 
-    // const handleTabChange = (event, newValue) => {
-    //     setTabValue(newValue);
-    // };
+    const handleBuySellSelectedChange = (event, newValue) => {
+        dispatch({ type: SET_BUY_SELL_TAB, payload: newValue });
+        setBuySellSelected(newValue);
+    };
 
-    // const getSellBalance = (target) => {
-    //     let sel = sellSelected;
-    //     if (typeof target !== "undefined") {
-    //         sel = target;
-    //     }
-    //     getBalance(sellTokens[sel].address, (balance, locked) => {
-    //         setSellBalance(balance - locked);
-    //     });
-    // };
+    const getSellBalance = async (target) => {
+        let sel = sellSelected;
+        if (typeof target !== "undefined") {
+            sel = target;
+        }
+        await getBalance(sellTokens[sel].address, (balance, locked) => {
+            setSellBalance(balance - locked);
+        });
+    };
 
-    // const handleSellSelectChange = (event) => {
-    //     setSellSelected(event.target.value);
-    //     dispatch({
-    //         type: SET_CURR_SELECTED_TOKEN,
-    //         payload: sellTokens[event.target.value],
-    //     });
-    //     checkEqual("sell", event.target.value);
-    //     getSellBalance(event.target.value);
-    // };
+    const handleSellSelectChange = (event) => {
+        setSellSelected(event.target.value);
+        dispatch({
+            type: SET_CURR_SELECTED_TOKEN,
+            payload: sellTokens[event.target.value],
+        });
+        checkEqual("sell", event.target.value);
+        getSellBalance(event.target.value);
+    };
 
     // const dispatchSnackBar = (message) => {
     //     dispatch({
