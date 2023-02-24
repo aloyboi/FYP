@@ -28,6 +28,7 @@ import {
     withdraw,
     getDAIBalance,
 } from "../../scripts/aaveLend";
+import { SET_INTEREST_RATE } from "../../redux/redux-actions/actions";
 import bannerImg from "../../common/assets/image/cryptoModern/banner-bg.png";
 
 //const lendingPool = process.env.REACT_APP_LENDINGPOOLADDRESSV2; //Aave Lending Pool Address that we will be using
@@ -35,7 +36,7 @@ const lendingPool = process.env.REACT_APP_LENDINGPOOLADDRESSV3;
 
 const LendingPlatform = () => {
     const [totalCollateralDAI, setTotalCollatoralDAI] = useState("");
-    const [interestRate, setInterestRate] = useState("");
+    const [interestRate, setInterestRate] = useState(0);
     const [amountToDeposit, setAmountToDeposit] = useState(0);
     const [amountToWithdraw, setAmountToWithdraw] = useState(0);
     const [selectedWithdraw, setSelectedWithdraw] = useState(false);
@@ -43,6 +44,14 @@ const LendingPlatform = () => {
     const [balanceDAI, setBalanceDai] = useState(0);
     const curr = useSelector((state) => state.account.address);
     const currDeposit = useSelector((state) => state.account.deposit);
+    const interest = useSelector((state) => state.account.interest);
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        console.log("entered");
+        getUserData();
+        getInterestRate();
+    }, []);
 
     useEffect(() => {
         if (currDeposit) {
@@ -54,13 +63,18 @@ const LendingPlatform = () => {
             getInterestRate();
         }
 
+        if (interest) {
+            console.log("entered");
+            setInterestRate(0);
+        }
+
         const interval = setInterval(() => {
             getUserData();
             getInterestRate();
             console.log("This will run every minute!");
         }, 60000);
         return () => clearInterval(interval);
-    }, [currDeposit, curr]);
+    }, [currDeposit, curr, interest]);
 
     const getUserData = async () => {
         if (curr !== null) {
@@ -77,6 +91,7 @@ const LendingPlatform = () => {
     const getInterestRate = async () => {
         if (curr !== null) {
             let intRate = await getReserveData(lendingPool);
+            dispatch({ type: SET_INTEREST_RATE, payload: intRate });
             setInterestRate(intRate);
         }
     };
@@ -145,7 +160,11 @@ const LendingPlatform = () => {
                         />
                         <Text
                             className="discountText"
-                            content={totalCollateralDAI + " DAI"}
+                            content={
+                                totalCollateralDAI != 0
+                                    ? totalCollateralDAI + " DAI"
+                                    : "0 DAI"
+                            }
                         />
                     </DiscountLabel>
                     <DiscountLabel justify-content="left">
@@ -165,7 +184,7 @@ const LendingPlatform = () => {
                         />
                         <Text
                             className="discountText"
-                            content={balanceDAI + "DAI"}
+                            content={balanceDAI + " DAI"}
                         />
                     </DiscountLabel>
                     <ButtonGroup>

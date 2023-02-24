@@ -21,6 +21,7 @@ import {
     SET_ACCOUNT,
     SET_DEPOSIT_AMOUNT,
     SET_TAB_VALUE,
+    SET_INTEREST_RATE,
 } from "../../redux/redux-actions/actions";
 import {
     getBorrowerData,
@@ -54,7 +55,8 @@ const Navbar = () => {
                     getDeposit(account[0]);
                 } else {
                     dispatch({ type: SET_ACCOUNT, payload: null });
-                    dispatch({ type: SET_DEPOSIT_AMOUNT, payload: 1 });
+                    dispatch({ type: SET_DEPOSIT_AMOUNT, payload: 0 });
+                    dispatch({ type: SET_INTEREST_RATE, payload: 0 });
                     setCurrentAccount("");
                 }
             });

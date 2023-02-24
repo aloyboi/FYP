@@ -11,16 +11,20 @@ import { data } from "./data";
 import Text from "../../common/components/Text";
 import Box from "@mui/material/Box";
 import InputLabel from "@mui/material/InputLabel";
+import { Switch } from "@mui/material";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
+import { FormGroup } from "@mui/material";
+import { FormControlLabel } from "@mui/material";
 import Select from "@mui/material/Select";
 import Fab from "@mui/material/Fab";
-// import AddIcon from "@mui/icons-material/Add";
+import AddIcon from "@mui/icons-material/Add";
 import Tooltip from "@mui/material/Tooltip";
 import DialogTitle from "@mui/material/DialogTitle";
 import Dialog from "@mui/material/Dialog";
 import { useDispatch, useSelector } from "react-redux";
 import "./dex.css";
+import B from "@mui/material/Box";
 import { marginTop } from "styled-system";
 import {
     SET_BUY_SELL_TAB,
@@ -48,7 +52,6 @@ const DexExchange = () => {
     const [buySellSelected, setBuySellSelected] = useState(0); //tab
     const [refTokenSelected, setRefTokenSelected] = useState(null); //top token
     const [againstTokenSelected, setAgainstTokenSelected] = useState(null); //bottom token
-    // const [allTokens, setAllTokens] = useState([]);
     const [waiveFees, setWaiveFees] = useState(false);
     const [refTextFieldError, setRefTextFieldError] = useState(false);
     const [refTextFieldHtext, setRefTextFieldHtext] = useState("");
@@ -66,9 +69,9 @@ const DexExchange = () => {
     const [sellBalance, setSellBalance] = useState(0);
     const dispatch = useDispatch();
 
-    // const [open, setOpen] = React.useState(false);
-    // const [newTokenAddress, setNewTokenAddress] = React.useState("");
-    // const adminAcc = process.env.REACT_APP_ADMIN_ADDRESS;
+    const [open, setOpen] = React.useState(false);
+    const [newTokenAddress, setNewTokenAddress] = React.useState("");
+    const adminAcc = process.env.REACT_APP_ADMIN_ADDRESS;
 
     function toFixed(num, fixed) {
         var re = new RegExp("^-?\\d+(?:.\\d{0," + (fixed || -1) + "})?");
@@ -82,7 +85,6 @@ const DexExchange = () => {
             type: SET_CURR_REF_TOKEN,
             payload: event.target.value, //index of all_tokens, have to  verify what event.target.value returns
         });
-        //checkEqual("sell", event.target.value);
         // getSellBalance(event.target.value);
     };
 
@@ -92,7 +94,6 @@ const DexExchange = () => {
             type: SET_CURR_AGAINST_TOKEN,
             payload: event.target.value, //index of all_tokens, have to  verify what event.target.value returns
         });
-        // checkEqual("buy", event.target.value);
     };
 
     // Buy/Sell tab
@@ -105,9 +106,6 @@ const DexExchange = () => {
     //If sell tab selected, get balance of refToken
     const getSellBalance = async (target) => {
         let sel = refTokenSelected;
-        // if (typeof target !== "undefined") {
-        //     sel = target;
-        // }
         await getBalance(allTokens[sel].address, (balance, locked) => {
             setSellBalance(balance - locked);
         });
@@ -116,27 +114,24 @@ const DexExchange = () => {
     //If buy tab selected, get balance of againstToken
     const getBuyBalance = (target) => {
         let buy = againstTokenSelected;
-        // if (typeof target !== "undefined") {
-        //     buy = target;
-        // }
         getBalance(allTokens[buy].address, (balance, locked) => {
             setBuyBalance(balance - locked);
         });
     };
 
-    // const dispatchSnackBar = (message) => {
-    //     dispatch({
-    //         type: LOG_MESSAGE,
-    //         payload: message,
-    //     });
-    // };
+    const dispatchSnackBar = (message) => {
+        dispatch({
+            type: LOG_MESSAGE,
+            payload: message,
+        });
+    };
 
-    // const dispatchSnackBarDisplay = (isDisplay) => {
-    //     dispatch({
-    //         type: IS_MESSAGE_DISPLAY,
-    //         payload: isDisplay,
-    //     });
-    // };
+    const dispatchSnackBarDisplay = (isDisplay) => {
+        dispatch({
+            type: IS_MESSAGE_DISPLAY,
+            payload: isDisplay,
+        });
+    };
 
     const handleRefAmountChange = (e) => {
         validateRefTokenAmount(e.target.value);
@@ -428,42 +423,6 @@ const DexExchange = () => {
         }
     };
 
-    // const checkEqual = (initiater, selected) => {
-    //     let btselect;
-    //     let stselect;
-    //     if (initiater === "buy") {
-    //         btselect = selected;
-    //         stselect = sellSelected;
-    //     } else {
-    //         btselect = buySelected;
-    //         stselect = selected;
-    //     }
-    //     if (
-    //         buyTokens &&
-    //         sellTokens &&
-    //         buyTokens[btselect].name === sellTokens[stselect].name
-    //     ) {
-    //         if (initiater === "buy") {
-    //             //shift same token to the end of the array
-
-    //             //make copy of sell tokens
-    //             let tempSellTokens = [...sellTokens];
-    //             let temp = tempSellTokens[sellSelected];
-    //             tempSellTokens.splice(sellSelected, 1);
-    //             tempSellTokens.push(temp);
-    //             dispatch({ type: SET_SELL_TOKENS, payload: tempSellTokens });
-    //             setSellSelected(0);
-    //         } else {
-    //             let tempBuyTokens = [...buyTokens];
-    //             let temp = tempBuyTokens[buySelected];
-    //             tempBuyTokens.splice(buySelected, 1);
-    //             tempBuyTokens.push(temp);
-    //             dispatch({ type: SET_BUY_TOKENS, payload: tempBuyTokens });
-    //             setBuySelected(0);
-    //         }
-    //     }
-    // };
-
     const addTokens = () => {
         setOpen(true);
     };
@@ -482,6 +441,11 @@ const DexExchange = () => {
             console.log(e);
         });
         setOpen(false);
+    };
+
+    const handleWaiveFees = () => {
+        setWaiveFees(!waiveFees);
+        console.log(!waiveFees);
     };
 
     const validateRate = (amt) => {
@@ -576,24 +540,6 @@ const DexExchange = () => {
     //         dispatchSnackBarDisplay(false);
     //     }, 2000);
     // };
-    // const flipAllStates = () => {
-    //     // let tempBuyTokens = [...buyTokens];
-    //     // let tempSellTokens = [...sellTokens];
-    //     // dispatch({ type: SET_BUY_TOKENS, payload: tempSellTokens });
-    //     // dispatch({ type: SET_SELL_TOKENS, payload: tempBuyTokens });
-    //     // let temp = buySelected;
-    //     // setBuySelected(sellSelected);
-    //     // setSellSelected(temp);
-    //     // temp = buyAmount;
-    //     // setBuyAmount(sellAmount);
-    //     // setSellAmount(temp);
-    //     // setRate(1 / rate);
-    //     if (tabValue === 0) {
-    //         setTabValue(1);
-    //     } else {
-    //         setTabValue(0);
-    //     }
-    // };
 
     const handleMakeOrderClick = () => {
         if (buySellSelected === 0) {
@@ -604,7 +550,6 @@ const DexExchange = () => {
                 againstTokenAmount.toString(),
                 rate.toString(),
                 waiveFees,
-
                 (e) => {
                     displayTempMessage(e);
                     dispatch({ type: INC_ORDER_COUNT });
@@ -637,12 +582,6 @@ const DexExchange = () => {
     };
 
     useEffect(() => {
-        // if (all_tokens) {
-        //     dispatch({ type: SET_ALL_TOKENS, payload: data.tokens });
-        //     dispatch({ type: SET_CURR_REF_TOKEN, payload: 0 });
-        //     dispatch({ type: SET_AGAINST_REF_TOKEN, payload: 0 });
-        //     setAllTokens(data.tokens);
-        // }
         //should only be called on initiation
         dispatch({ type: SET_ALL_TOKENS, payload: data.tokens });
 
@@ -657,6 +596,7 @@ const DexExchange = () => {
                     flexDirection: "column",
                     alignItems: "center",
                     width: "500px",
+                    height: "620px",
                     typography: "body1",
                     color: "white",
                     backgroundColor: "#152149",
@@ -672,14 +612,16 @@ const DexExchange = () => {
                 >
                     <Tab label="Sell" value={0} />
                     <Tab label="Buy" value={1} />
-                    {/* {account ? (
-                        account.toLowerCase() === adminAcc.toLowerCase() ? (
+                    {curr ? (
+                        curr.toLowerCase() === adminAcc.toLowerCase() ? (
                             <Tooltip title="Click Here to Add Tokens">
                                 <Fab
                                     sx={{
                                         marginLeft: "220px",
                                         marginTop: "15px",
                                         marginRight: "2px",
+                                        width: "38px",
+                                        height: "38px",
                                     }}
                                     onClick={addTokens}
                                 >
@@ -690,7 +632,7 @@ const DexExchange = () => {
                                 </Fab>
                             </Tooltip>
                         ) : null
-                    ) : null} */}
+                    ) : null}
                 </Tabs>
                 <div
                     style={{
@@ -1039,13 +981,21 @@ const DexExchange = () => {
                             </div>
                         </Card>
                     </div>
+
+                    <FormControlLabel
+                        control={<Switch sx={{}} onClick={handleWaiveFees} />}
+                        label="Waive Fees"
+                        labelPlacement="start"
+                        sx={{ marginTop: "5px", marginBottom: "-8px" }}
+                    />
+
                     {refTokenSelected != againstTokenSelected &&
                     refTokenSelected != null &&
                     againstTokenSelected != null ? (
                         <Button
                             className="click-button"
                             style={{
-                                marginTop: "20px",
+                                marginTop: "0px",
                                 width: "100%",
                                 padding: "2.5px 0px 2.5px 0px",
                                 height: "50px",
@@ -1053,7 +1003,7 @@ const DexExchange = () => {
                                     "linear-gradient(to right,#4ba1d8,#4464e0 95%)",
                                 color: "white",
                             }}
-                            // onClick={handleBuyClick}
+                            onClick={handleMakeOrderClick}
                         >
                             MAKE LIMIT ORDER
                         </Button>
@@ -1069,13 +1019,14 @@ const DexExchange = () => {
                                 backgroundColor: "grey",
                                 color: "white",
                             }}
-                            // onClick={handleBuyClick}
+                            onClick={handleMakeOrderClick}
                         >
                             MAKE LIMIT ORDER
                         </Button>
                     )}
                 </div>
-                {/* <Dialog open={open} onClose={handleClose}>
+
+                <Dialog open={open} onClose={handleClose}>
                     <DialogTitle sx={{ width: "500px" }}>
                         Input Token Address
                     </DialogTitle>
@@ -1103,10 +1054,10 @@ const DexExchange = () => {
                             marginLeft: "200px",
                         }}
                     >
-                        Add
+                        Add New Token
                     </Button>
                     <B sx={{ height: "50px" }}></B>
-                </Dialog> */}
+                </Dialog>
             </div>
         </DexExchangeContainer>
     );

@@ -1,6 +1,7 @@
 import {
     SET_ACCOUNT,
     SET_DEPOSIT_AMOUNT,
+    SET_INTEREST_RATE,
     SET_TAB_VALUE,
     SET_BUY_SELL_TAB,
     SET_CURR_REF_TOKEN,
@@ -13,6 +14,7 @@ import {
 const defaultAccount = {
     address: null,
     deposit: 0,
+    interest: 0,
 };
 
 export const accountReducer = (state = defaultAccount, action) => {
@@ -21,6 +23,8 @@ export const accountReducer = (state = defaultAccount, action) => {
             return { ...state, address: action.payload };
         case SET_DEPOSIT_AMOUNT:
             return { ...state, deposit: action.payload };
+        case SET_INTEREST_RATE:
+            return { ...state, interest: action.payload };
         default:
             return state;
     }
