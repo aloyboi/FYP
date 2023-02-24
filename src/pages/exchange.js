@@ -2,20 +2,11 @@ import { Helmet, HelmetProvider } from "react-helmet-async";
 import { ThemeProvider } from "styled-components";
 import { theme } from "../common/theme/appModern";
 import ResetCSS from "../common/assets/css/style";
-//import Sticky from "react-stickynode";
 import Navbar from "../components/Navbar";
 import Banner from "../components/Banner";
 import LendingPlatform from "../components/LendingPlatform";
-import CountDown from "../components/CountDown";
-import Features from "../components/FeatureSection";
 import WorkHistory from "../components/WorkHistory";
-import Investment from "../components/Investment";
-import FundRaising from "../components/FundRaising";
-import Privacypolicy from "../components/Privacy";
-import WalletSection from "../components/WalletSection";
-import MapSection from "../components/MapSection";
-import FaqSection from "../components/FaqSection";
-import Footer from "../components/Footer";
+
 import GlobalStyle, {
     CryptoWrapper,
     ContentWrapper,
@@ -56,26 +47,15 @@ const Exchange = () => {
                         </Helmet>
                     </HelmetProvider>
 
-                    {/* end of head */}
-
                     <ResetCSS />
                     <GlobalStyle />
-                    {/* end of global and reset style */}
-
-                    {/* start app classic landing */}
 
                     <CryptoWrapper>
-                        {/* <Sticky top={0} innerZ={9999} activeClass="sticky-active">
-                            <Navbar />
-                        </Sticky> */}
-
                         <ContentWrapper>
                             <Navbar></Navbar>
                             <Banner></Banner>
                         </ContentWrapper>
-                        {/* <Footer /> */}
                     </CryptoWrapper>
-                    {/* end of app classic landing */}
                 </>
             </ThemeProvider>
         );
@@ -102,26 +82,15 @@ const Exchange = () => {
                         </Helmet>
                     </HelmetProvider>
 
-                    {/* end of head */}
-
                     <ResetCSS />
                     <GlobalStyle />
-                    {/* end of global and reset style */}
-
-                    {/* start app classic landing */}
 
                     <CryptoWrapper>
-                        {/* <Sticky top={0} innerZ={9999} activeClass="sticky-active">
-                            <Navbar />
-                        </Sticky> */}
-
                         <ContentWrapper>
                             <Navbar></Navbar>
                             <DexExchange></DexExchange>
                         </ContentWrapper>
-                        {/* <Footer /> */}
                     </CryptoWrapper>
-                    {/* end of app classic landing */}
                 </>
             </ThemeProvider>
         );
@@ -147,27 +116,15 @@ const Exchange = () => {
                             />
                         </Helmet>
                     </HelmetProvider>
-
-                    {/* end of head */}
-
                     <ResetCSS />
                     <GlobalStyle />
-                    {/* end of global and reset style */}
-
-                    {/* start app classic landing */}
 
                     <CryptoWrapper>
-                        {/* <Sticky top={0} innerZ={9999} activeClass="sticky-active">
-                            <Navbar />
-                        </Sticky> */}
-
                         <ContentWrapper>
                             <Navbar></Navbar>
                             <LendingPlatform></LendingPlatform>
                         </ContentWrapper>
-                        {/* <Footer /> */}
                     </CryptoWrapper>
-                    {/* end of app classic landing */}
                 </>
             </ThemeProvider>
         );
