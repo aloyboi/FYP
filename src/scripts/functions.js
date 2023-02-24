@@ -39,7 +39,6 @@ export async function getBalance(_tokenAddress, callback) {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const signer = provider.getSigner();
     const contract = new ethers.Contract(walletAddress, Wallet.abi, signer);
-    //let tokenAddress = _tokenAddress;
     let userAdd;
     try {
         userAdd = await signer.getAddress();
