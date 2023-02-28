@@ -13,18 +13,14 @@ async function main() {
     const chainId = network.config.chainId;
     const usdcAddress = networkConfig[chainId]["USDC"];
 
-    const Wallet = await wallet.deploy(
-        "0x6D4886675d7C8F98CDA65440A14C9fe7F84A0C85" //Exchange Address
-    );
+    const Wallet = await wallet.deploy();
     await Wallet.deployed();
     console.log(`Deployed contract to: ${Wallet.address}`);
     // what happens when we deploy to our hardhat network?
     if (network.config.chainId === 5 && process.env.ETHERSCAN_API_KEY) {
         console.log("Waiting for block confirmations...");
         await Wallet.deployTransaction.wait(6);
-        await verify(Wallet.address, [
-            "0x6D4886675d7C8F98CDA65440A14C9fe7F84A0C85",
-        ]);
+        await verify(Wallet.address, []);
     }
 }
 

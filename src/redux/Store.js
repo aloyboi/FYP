@@ -6,6 +6,7 @@ import {
     tabValueReducer,
     tokenReducer,
     orderReducer,
+    messageReducer,
 } from "./redux-reducers/reducers";
 
 const rootReducer = combineReducers({
@@ -13,6 +14,7 @@ const rootReducer = combineReducers({
     tabValue: tabValueReducer,
     token: tokenReducer,
     orders: orderReducer,
+    message: messageReducer,
 });
 
 const store = createStore(rootReducer, compose(applyMiddleware(thunk)));

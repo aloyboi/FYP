@@ -1,135 +1,9 @@
 {
   "_format": "hh-sol-cache-2",
   "files": {
-    "C:\\Users\\aloyboi\\Desktop\\School\\FYP\\FYP\\src\\contracts\\interface\\AggregatorV3Interface.sol": {
-      "lastModificationDate": 1671717664000,
-      "contentHash": "272b500fba13d4f261e8fa560da4d4a9",
-      "sourceName": "contracts/interface/AggregatorV3Interface.sol",
-      "solcConfig": {
-        "version": "0.6.12",
-        "settings": {
-          "optimizer": {
-            "enabled": false,
-            "runs": 200
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata",
-                "devdoc",
-                "userdoc",
-                "storageLayout",
-                "evm.gasEstimates"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          },
-          "metadata": {
-            "useLiteralContent": true
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.6.0"
-      ],
-      "artifacts": [
-        "AggregatorV3Interface"
-      ]
-    },
-    "C:\\Users\\aloyboi\\Desktop\\School\\FYP\\FYP\\src\\contracts\\interface\\IERC20.sol": {
-      "lastModificationDate": 1676438890768,
-      "contentHash": "88da17b6994f7d8dde168e31a1df6019",
-      "sourceName": "contracts/interface/IERC20.sol",
-      "solcConfig": {
-        "version": "0.8.7",
-        "settings": {
-          "optimizer": {
-            "enabled": false,
-            "runs": 200
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata",
-                "devdoc",
-                "userdoc",
-                "storageLayout",
-                "evm.gasEstimates"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          },
-          "metadata": {
-            "useLiteralContent": true
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.0"
-      ],
-      "artifacts": [
-        "IERC20"
-      ]
-    },
-    "C:\\Users\\aloyboi\\Desktop\\School\\FYP\\FYP\\src\\contracts\\interface\\IWeth.sol": {
-      "lastModificationDate": 1671717664000,
-      "contentHash": "6adcd8c2f3b95f354af940c6b26166de",
-      "sourceName": "contracts/interface/IWeth.sol",
-      "solcConfig": {
-        "version": "0.4.19",
-        "settings": {
-          "optimizer": {
-            "enabled": false,
-            "runs": 200
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata",
-                "devdoc",
-                "userdoc",
-                "storageLayout",
-                "evm.gasEstimates"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          },
-          "metadata": {
-            "useLiteralContent": true
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.4.19"
-      ],
-      "artifacts": [
-        "IWeth"
-      ]
-    },
-    "C:\\Users\\aloyboi\\Desktop\\School\\FYP\\FYP\\src\\contracts\\Exchange.sol": {
-      "lastModificationDate": 1677151025429,
-      "contentHash": "29c62c96f3d6ea4ab993491e05e9d713",
+    "C:\\Users\\Aloysius Seow\\Desktop\\SCHOOL\\FYP\\FYP\\src\\contracts\\Exchange.sol": {
+      "lastModificationDate": 1677559682293,
+      "contentHash": "d39a02700bf6cf8cc933a14cbaa832eb",
       "sourceName": "contracts/Exchange.sol",
       "solcConfig": {
         "version": "0.8.7",
@@ -175,57 +49,9 @@
         "Exchange"
       ]
     },
-    "C:\\Users\\aloyboi\\Desktop\\School\\FYP\\FYP\\src\\contracts\\Wallet.sol": {
-      "lastModificationDate": 1677150997314,
-      "contentHash": "dd86880f35daafe527cca0e9eb64db66",
-      "sourceName": "contracts/Wallet.sol",
-      "solcConfig": {
-        "version": "0.8.7",
-        "settings": {
-          "optimizer": {
-            "enabled": false,
-            "runs": 200
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata",
-                "devdoc",
-                "userdoc",
-                "storageLayout",
-                "evm.gasEstimates"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          },
-          "metadata": {
-            "useLiteralContent": true
-          }
-        }
-      },
-      "imports": [
-        "./interface/IERC20.sol",
-        "./Exchange.sol",
-        "@openzeppelin/contracts/utils/math/SafeMath.sol",
-        "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol",
-        "@openzeppelin/contracts/access/Ownable.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.0"
-      ],
-      "artifacts": [
-        "Wallet"
-      ]
-    },
-    "C:\\Users\\aloyboi\\Desktop\\School\\FYP\\FYP\\src\\contracts\\TradingFees.sol": {
-      "lastModificationDate": 1677151026868,
-      "contentHash": "28cd98f8c669b5aeb05dff43ddd0327a",
+    "C:\\Users\\Aloysius Seow\\Desktop\\SCHOOL\\FYP\\FYP\\src\\contracts\\TradingFees.sol": {
+      "lastModificationDate": 1677210971322,
+      "contentHash": "bbb6885ab02d1ccd9b3a48d753df0e2f",
       "sourceName": "contracts/TradingFees.sol",
       "solcConfig": {
         "version": "0.8.7",
@@ -271,53 +97,8 @@
         "TradingFees"
       ]
     },
-    "C:\\Users\\aloyboi\\Desktop\\School\\FYP\\FYP\\src\\contracts\\PriceChecker.sol": {
-      "lastModificationDate": 1677150462287,
-      "contentHash": "616fba37a94dbd957dc49f3523068631",
-      "sourceName": "contracts/PriceChecker.sol",
-      "solcConfig": {
-        "version": "0.8.7",
-        "settings": {
-          "optimizer": {
-            "enabled": false,
-            "runs": 200
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata",
-                "devdoc",
-                "userdoc",
-                "storageLayout",
-                "evm.gasEstimates"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          },
-          "metadata": {
-            "useLiteralContent": true
-          }
-        }
-      },
-      "imports": [
-        "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol",
-        "@openzeppelin/contracts/access/Ownable.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.7"
-      ],
-      "artifacts": [
-        "PriceChecker"
-      ]
-    },
-    "C:\\Users\\aloyboi\\Desktop\\School\\FYP\\FYP\\node_modules\\@openzeppelin\\contracts\\access\\Ownable.sol": {
-      "lastModificationDate": 1676301446118,
+    "C:\\Users\\Aloysius Seow\\Desktop\\SCHOOL\\FYP\\FYP\\node_modules\\@openzeppelin\\contracts\\access\\Ownable.sol": {
+      "lastModificationDate": 1677210960572,
       "contentHash": "e436cea06129be2c73cda4b1acc848b5",
       "sourceName": "@openzeppelin/contracts/access/Ownable.sol",
       "solcConfig": {
@@ -360,8 +141,8 @@
         "Ownable"
       ]
     },
-    "C:\\Users\\aloyboi\\Desktop\\School\\FYP\\FYP\\node_modules\\@openzeppelin\\contracts\\utils\\math\\SafeMath.sol": {
-      "lastModificationDate": 1676301446348,
+    "C:\\Users\\Aloysius Seow\\Desktop\\SCHOOL\\FYP\\FYP\\node_modules\\@openzeppelin\\contracts\\utils\\math\\SafeMath.sol": {
+      "lastModificationDate": 1677210960617,
       "contentHash": "2337f0279507b5edf14a07067adf0d05",
       "sourceName": "@openzeppelin/contracts/utils/math/SafeMath.sol",
       "solcConfig": {
@@ -402,8 +183,8 @@
         "SafeMath"
       ]
     },
-    "C:\\Users\\aloyboi\\Desktop\\School\\FYP\\FYP\\node_modules\\@chainlink\\contracts\\src\\v0.8\\interfaces\\AggregatorV3Interface.sol": {
-      "lastModificationDate": 1676301443873,
+    "C:\\Users\\Aloysius Seow\\Desktop\\SCHOOL\\FYP\\FYP\\node_modules\\@chainlink\\contracts\\src\\v0.8\\interfaces\\AggregatorV3Interface.sol": {
+      "lastModificationDate": 1677210958936,
       "contentHash": "d9654a0fc044a31d4106ee6bca772add",
       "sourceName": "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol",
       "solcConfig": {
@@ -444,8 +225,8 @@
         "AggregatorV3Interface"
       ]
     },
-    "C:\\Users\\aloyboi\\Desktop\\School\\FYP\\FYP\\node_modules\\@openzeppelin\\contracts\\utils\\Context.sol": {
-      "lastModificationDate": 1676301446330,
+    "C:\\Users\\Aloysius Seow\\Desktop\\SCHOOL\\FYP\\FYP\\node_modules\\@openzeppelin\\contracts\\utils\\Context.sol": {
+      "lastModificationDate": 1677210960614,
       "contentHash": "5f2c5c4b6af2dd4551027144797bc8be",
       "sourceName": "@openzeppelin/contracts/utils/Context.sol",
       "solcConfig": {
@@ -486,8 +267,50 @@
         "Context"
       ]
     },
-    "C:\\Users\\aloyboi\\Desktop\\School\\FYP\\FYP\\src\\contracts\\interface\\IPool.sol": {
-      "lastModificationDate": 1676794517075,
+    "C:\\Users\\Aloysius Seow\\Desktop\\SCHOOL\\FYP\\FYP\\src\\contracts\\interface\\IERC20.sol": {
+      "lastModificationDate": 1677210971322,
+      "contentHash": "88da17b6994f7d8dde168e31a1df6019",
+      "sourceName": "contracts/interface/IERC20.sol",
+      "solcConfig": {
+        "version": "0.8.7",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "IERC20"
+      ]
+    },
+    "C:\\Users\\Aloysius Seow\\Desktop\\SCHOOL\\FYP\\FYP\\src\\contracts\\interface\\IPool.sol": {
+      "lastModificationDate": 1677210971322,
       "contentHash": "256bee75e8839c19327ac9a2dfa863e8",
       "sourceName": "contracts/interface/IPool.sol",
       "solcConfig": {
@@ -531,8 +354,8 @@
         "IPool"
       ]
     },
-    "C:\\Users\\aloyboi\\Desktop\\School\\FYP\\FYP\\src\\contracts\\interface\\IPoolAddressesProvider.sol": {
-      "lastModificationDate": 1676793369818,
+    "C:\\Users\\Aloysius Seow\\Desktop\\SCHOOL\\FYP\\FYP\\src\\contracts\\interface\\IPoolAddressesProvider.sol": {
+      "lastModificationDate": 1677210971322,
       "contentHash": "065c8d60cd48bced8cc451e96783428c",
       "sourceName": "contracts/interface/IPoolAddressesProvider.sol",
       "solcConfig": {
@@ -573,8 +396,8 @@
         "IPoolAddressesProvider"
       ]
     },
-    "C:\\Users\\aloyboi\\Desktop\\School\\FYP\\FYP\\node_modules\\@aave\\core-v3\\contracts\\protocol\\libraries\\types\\DataTypes.sol": {
-      "lastModificationDate": 1676794310698,
+    "C:\\Users\\Aloysius Seow\\Desktop\\SCHOOL\\FYP\\FYP\\node_modules\\@aave\\core-v3\\contracts\\protocol\\libraries\\types\\DataTypes.sol": {
+      "lastModificationDate": 1677210958338,
       "contentHash": "03302610532390610829fcf0c6a876c5",
       "sourceName": "@aave/core-v3/contracts/protocol/libraries/types/DataTypes.sol",
       "solcConfig": {
@@ -613,6 +436,356 @@
       ],
       "artifacts": [
         "DataTypes"
+      ]
+    },
+    "C:\\Users\\Aloysius Seow\\Desktop\\SCHOOL\\FYP\\FYP\\src\\contracts\\interface\\AggregatorV3Interface.sol": {
+      "lastModificationDate": 1677210971322,
+      "contentHash": "272b500fba13d4f261e8fa560da4d4a9",
+      "sourceName": "contracts/interface/AggregatorV3Interface.sol",
+      "solcConfig": {
+        "version": "0.6.12",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.6.0"
+      ],
+      "artifacts": [
+        "AggregatorV3Interface"
+      ]
+    },
+    "C:\\Users\\Aloysius Seow\\Desktop\\SCHOOL\\FYP\\FYP\\src\\contracts\\MockAggregator.sol": {
+      "lastModificationDate": 1677210971322,
+      "contentHash": "dcd7ee3d49aafbe2ce82d29126530d1f",
+      "sourceName": "contracts/MockAggregator.sol",
+      "solcConfig": {
+        "version": "0.6.12",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [
+        "@chainlink/contracts/src/v0.6/interfaces/AggregatorV2V3Interface.sol"
+      ],
+      "versionPragmas": [
+        "^0.6.0"
+      ],
+      "artifacts": [
+        "MockAggregator"
+      ]
+    },
+    "C:\\Users\\Aloysius Seow\\Desktop\\SCHOOL\\FYP\\FYP\\node_modules\\@chainlink\\contracts\\src\\v0.6\\interfaces\\AggregatorV2V3Interface.sol": {
+      "lastModificationDate": 1677210958901,
+      "contentHash": "6b76a24083942363411bb0b83ffeb997",
+      "sourceName": "@chainlink/contracts/src/v0.6/interfaces/AggregatorV2V3Interface.sol",
+      "solcConfig": {
+        "version": "0.6.12",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [
+        "./AggregatorInterface.sol",
+        "./AggregatorV3Interface.sol"
+      ],
+      "versionPragmas": [
+        "^0.6.0"
+      ],
+      "artifacts": [
+        "AggregatorV2V3Interface"
+      ]
+    },
+    "C:\\Users\\Aloysius Seow\\Desktop\\SCHOOL\\FYP\\FYP\\node_modules\\@chainlink\\contracts\\src\\v0.6\\interfaces\\AggregatorInterface.sol": {
+      "lastModificationDate": 1677210958901,
+      "contentHash": "0c9be74e354bca05abc54edfdc49607e",
+      "sourceName": "@chainlink/contracts/src/v0.6/interfaces/AggregatorInterface.sol",
+      "solcConfig": {
+        "version": "0.6.12",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.6.0"
+      ],
+      "artifacts": [
+        "AggregatorInterface"
+      ]
+    },
+    "C:\\Users\\Aloysius Seow\\Desktop\\SCHOOL\\FYP\\FYP\\node_modules\\@chainlink\\contracts\\src\\v0.6\\interfaces\\AggregatorV3Interface.sol": {
+      "lastModificationDate": 1677210958901,
+      "contentHash": "79f9f2c352a0b4454d1416042e7f7ae0",
+      "sourceName": "@chainlink/contracts/src/v0.6/interfaces/AggregatorV3Interface.sol",
+      "solcConfig": {
+        "version": "0.6.12",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.6.0"
+      ],
+      "artifacts": [
+        "AggregatorV3Interface"
+      ]
+    },
+    "C:\\Users\\Aloysius Seow\\Desktop\\SCHOOL\\FYP\\FYP\\src\\contracts\\interface\\IWeth.sol": {
+      "lastModificationDate": 1677210971322,
+      "contentHash": "6adcd8c2f3b95f354af940c6b26166de",
+      "sourceName": "contracts/interface/IWeth.sol",
+      "solcConfig": {
+        "version": "0.4.19",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.4.19"
+      ],
+      "artifacts": [
+        "IWeth"
+      ]
+    },
+    "C:\\Users\\Aloysius Seow\\Desktop\\SCHOOL\\FYP\\FYP\\src\\contracts\\PriceChecker.sol": {
+      "lastModificationDate": 1677210971322,
+      "contentHash": "616fba37a94dbd957dc49f3523068631",
+      "sourceName": "contracts/PriceChecker.sol",
+      "solcConfig": {
+        "version": "0.8.7",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [
+        "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol",
+        "@openzeppelin/contracts/access/Ownable.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.7"
+      ],
+      "artifacts": [
+        "PriceChecker"
+      ]
+    },
+    "C:\\Users\\Aloysius Seow\\Desktop\\SCHOOL\\FYP\\FYP\\src\\contracts\\Wallet.sol": {
+      "lastModificationDate": 1677483868379,
+      "contentHash": "30301e6a4b167e4e111e14c146fc091b",
+      "sourceName": "contracts/Wallet.sol",
+      "solcConfig": {
+        "version": "0.8.7",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [
+        "./interface/IERC20.sol",
+        "./Exchange.sol",
+        "@openzeppelin/contracts/utils/math/SafeMath.sol",
+        "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol",
+        "@openzeppelin/contracts/access/Ownable.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "Wallet"
       ]
     }
   }

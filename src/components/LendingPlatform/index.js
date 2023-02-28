@@ -243,12 +243,6 @@ const LendingPlatform = () => {
                                         content="Withdraw Amount: "
                                         className="discountAmount"
                                     ></Text>
-                                    {/* <Input
-                                    value={amountToWithdraw}
-                                    onChange={(e) =>
-                                        setAmountToWithdraw(e.target.value)
-                                    }
-                                ></Input> */}
                                     <input
                                         type="text"
                                         value={amountToWithdraw}

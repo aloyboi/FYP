@@ -19,7 +19,6 @@ contract Wallet is Ownable {
     bool private locked;
 
     address public ethToken = address(0);
-    address public aETH = address(0x22404B0e2a7067068AcdaDd8f9D586F834cCe2c5);
 
     mapping(address => mapping(address => uint256)) public s_tokens; //tokenAdress -> msg.sender -> tokenAmt
     mapping(address => mapping(address => uint256)) public lockedFunds;

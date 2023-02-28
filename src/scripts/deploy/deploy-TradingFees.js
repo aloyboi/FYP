@@ -13,7 +13,7 @@ async function main() {
     const chainId = network.config.chainId;
 
     const tradingFees = await tradingfees.deploy(
-        "0x0d8aBdFeD0E3ac655667B0B1C3b73Ed6DC91F30d"
+        "0x2Eca751b14452a8Ba01DF9f698656112900c514c"
     );
     await tradingFees.deployed();
     console.log(`Deployed contract to: ${tradingFees.address}`);
@@ -22,7 +22,7 @@ async function main() {
         console.log("Waiting for block confirmations...");
         await tradingFees.deployTransaction.wait(6);
         await verify(tradingFees.address, [
-            "0x0d8aBdFeD0E3ac655667B0B1C3b73Ed6DC91F30d",
+            "0x2Eca751b14452a8Ba01DF9f698656112900c514c",
         ]);
     }
 }

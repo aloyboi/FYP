@@ -1,5 +1,6 @@
 import DexExchangeContainer from "./dex.style";
 import { useEffect, useState } from "react";
+import WorkHistory from "../WorkHistory";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
@@ -31,6 +32,8 @@ import {
     SET_CURR_REF_TOKEN,
     SET_CURR_AGAINST_TOKEN,
     SET_ALL_TOKENS,
+    LOG_MESSAGE,
+    IS_MESSAGE_DISPLAY,
 } from "../../redux/redux-actions/actions";
 
 import {
@@ -38,14 +41,15 @@ import {
     createLimitSellOrder,
     addToken,
     getBalance,
+    calculateTokenPrice,
 } from "../../scripts/functions";
+import { ethers } from "ethers";
 
 const DexExchange = () => {
     //Selectors
     const buy_sell_selected = useSelector(
         (state) => state.tabValue.buySellSelected
     );
-    //const selectMessage = (state) => state.message.message;
     const curr = useSelector((state) => state.account.address);
     const allTokens = useSelector((state) => state.token.all_tokens);
 
@@ -60,6 +64,9 @@ const DexExchange = () => {
 
     const [refTokenAmount, setRefTokenAmount] = useState(0);
     const [againstTokenAmount, setAgainstTokenAmount] = useState(0);
+    const [refTokenPrice, setRefTokenPrice] = useState(0);
+    const [againstTokenPrice, setAgainstTokenPrice] = useState(0);
+    const [pricePair, setPricePair] = useState(0);
 
     const [rateTextFieldError, setRateTextFieldError] = useState(false);
     const [rateTextFieldHtext, setRateTextFieldHtext] = useState("");
@@ -78,22 +85,27 @@ const DexExchange = () => {
         return num.toString().match(re)[0];
     }
 
-    const handleRefTokenSelectChange = (event) => {
+    const handleRefTokenSelectChange = async (event) => {
         console.log(event.target.value);
         setRefTokenSelected(event.target.value);
         dispatch({
             type: SET_CURR_REF_TOKEN,
             payload: event.target.value, //index of all_tokens, have to  verify what event.target.value returns
         });
-        // getSellBalance(event.target.value);
+        getRefTokenBalance(event.target.value);
+        setRefTokenPrice(calculatePrice(allTokens[event.target.value].address));
     };
 
-    const handleAgainstTokenSelectChange = (event) => {
+    const handleAgainstTokenSelectChange = async (event) => {
         setAgainstTokenSelected(event.target.value);
         dispatch({
             type: SET_CURR_AGAINST_TOKEN,
             payload: event.target.value, //index of all_tokens, have to  verify what event.target.value returns
         });
+        getAgainstTokenBalance(event.target.value);
+        setAgainstTokenPrice(
+            calculatePrice(allTokens[event.target.value].address)
+        );
     };
 
     // Buy/Sell tab
@@ -104,38 +116,50 @@ const DexExchange = () => {
     };
 
     //If sell tab selected, get balance of refToken
-    const getSellBalance = async (target) => {
-        let sel = refTokenSelected;
-        await getBalance(allTokens[sel].address, (balance, locked) => {
-            setSellBalance(balance - locked);
-        });
+    const getRefTokenBalance = async (value) => {
+        await getBalance(
+            allTokens[value].address,
+            allTokens[value].decimals,
+            (balance, locked) => {
+                setSellBalance(balance - locked);
+            }
+        );
     };
 
     //If buy tab selected, get balance of againstToken
-    const getBuyBalance = (target) => {
-        let buy = againstTokenSelected;
-        getBalance(allTokens[buy].address, (balance, locked) => {
-            setBuyBalance(balance - locked);
-        });
+    const getAgainstTokenBalance = (value) => {
+        getBalance(
+            allTokens[value].address,
+            allTokens[value].decimals,
+            (balance, locked) => {
+                setBuyBalance(balance - locked);
+            }
+        );
     };
 
-    const dispatchSnackBar = (message) => {
+    const displayTempMessage = (message) => {
         dispatch({
             type: LOG_MESSAGE,
             payload: message,
         });
-    };
-
-    const dispatchSnackBarDisplay = (isDisplay) => {
         dispatch({
             type: IS_MESSAGE_DISPLAY,
-            payload: isDisplay,
+            payload: true,
         });
+        setTimeout(() => {
+            dispatch({
+                type: LOG_MESSAGE,
+                payload: "",
+            });
+            dispatch({
+                type: IS_MESSAGE_DISPLAY,
+                payload: false,
+            });
+        }, 2000);
     };
 
     const handleRefAmountChange = (e) => {
         validateRefTokenAmount(e.target.value);
-        // getBuyBalance(number);
     };
 
     const handleAgainstAmountChange = (e) => {
@@ -143,7 +167,6 @@ const DexExchange = () => {
     };
 
     const handleRateChange = (e) => {
-        // event.preventDefault();
         validateRate(e.target.value);
     };
 
@@ -162,8 +185,8 @@ const DexExchange = () => {
         let tokenDecimal = allTokens[refTokenSelected].decimals;
         let number = amt;
         let regex;
-        if (tokenDecimal == 18) regex = /^(?!0\d|$)\d*(\.\d{1,18})?$/;
-        else if (tokenDecimal == 6) regex = /^(?!0\d|$)\d*(\.\d{1,6})?$/;
+        if (tokenDecimal == 18) regex = /^(?!0\d|$)\d*(\.\d{0,18})?$/;
+        else if (tokenDecimal == 6) regex = /^(?!0\d|$)\d*(\.\d{0,6})?$/;
         const letterRegex = /^\d*\.?\d*$/;
 
         if (number === 0 || number === "") {
@@ -174,7 +197,6 @@ const DexExchange = () => {
 
         //test for letters
         if (!letterRegex.test(number)) {
-            console.log("enter");
             setRefTextFieldError(true);
             setRefTextFieldHtext("Please enter valid numbers only");
             // turn off error after 2 seconds
@@ -201,17 +223,17 @@ const DexExchange = () => {
             }
             return;
         }
-        if (lastChar === "0") {
-            setRefTextFieldError(false);
-            setRefTextFieldHtext("");
-            setRefTokenAmount(number);
-            if (rate != 0) {
-                setAgainstTokenAmount(number * rate);
-            } else if (againstTokenAmount != 0 && rate == 0) {
-                setRate(againstTokenAmount / number);
-            }
-            return;
-        }
+        // if (lastChar === "0") {
+        //     setRefTextFieldError(false);
+        //     setRefTextFieldHtext("");
+        //     setRefTokenAmount(number);
+        //     if (rate != 0) {
+        //         setAgainstTokenAmount(number * rate);
+        //     } else if (againstTokenAmount != 0 && rate == 0) {
+        //         setRate(againstTokenAmount / number);
+        //     }
+        //     return;
+        // }
         if (firstChar === "0" && secondChar !== ".") {
             setRefTextFieldError(false);
             setRefTextFieldHtext("");
@@ -300,8 +322,8 @@ const DexExchange = () => {
         let tokenDecimal = allTokens[againstTokenSelected].decimals;
         let number = amt;
         let regex;
-        if (tokenDecimal == 18) regex = /^(?!0\d|$)\d*(\.\d{1,18})?$/;
-        else if (tokenDecimal == 6) regex = /^(?!0\d|$)\d*(\.\d{1,6})?$/;
+        if (tokenDecimal == 18) regex = /^(?!0\d|$)\d*(\.\d{0,18})?$/;
+        else if (tokenDecimal == 6) regex = /^(?!0\d|$)\d*(\.\d{0,6})?$/;
         const letterRegex = /^\d*\.?\d*$/;
 
         if (number === 0 || number === "") {
@@ -312,7 +334,6 @@ const DexExchange = () => {
 
         //test for letters
         if (!letterRegex.test(number)) {
-            console.log("enter");
             setAgainstTextFieldError(true);
             setAgainstTextFieldHtext("Please enter valid numbers only");
             // turn off error after 2 seconds
@@ -339,17 +360,17 @@ const DexExchange = () => {
             }
             return;
         }
-        if (lastChar === "0") {
-            setAgainstTextFieldError(false);
-            setAgainstTextFieldHtext("");
-            setAgainstTokenAmount(number);
-            if (refTokenAmount != 0) {
-                setRate(number / refTokenAmount);
-            } else if (refTokenAmount == 0 && rate != 0) {
-                setRefTokenAmount(number / rate);
-            }
-            return;
-        }
+        // if (lastChar === "0") {
+        //     setAgainstTextFieldError(false);
+        //     setAgainstTextFieldHtext("");
+        //     setAgainstTokenAmount(number);
+        //     if (refTokenAmount != 0) {
+        //         setRate(number / refTokenAmount);
+        //     } else if (refTokenAmount == 0 && rate != 0) {
+        //         setRefTokenAmount(number / rate);
+        //     }
+        //     return;
+        // }
         if (firstChar === "0" && secondChar !== ".") {
             setAgainstTextFieldError(false);
             setAgainstTextFieldHtext("");
@@ -443,6 +464,11 @@ const DexExchange = () => {
         setOpen(false);
     };
 
+    const calculatePrice = async (_address) => {
+        const price = await calculateTokenPrice(_address);
+        return price;
+    };
+
     const handleWaiveFees = () => {
         setWaiveFees(!waiveFees);
         console.log(!waiveFees);
@@ -498,17 +524,17 @@ const DexExchange = () => {
             }
             return;
         }
-        if (lastChar === "0") {
-            setRateTextFieldError(false);
-            setRateTextFieldHtext("");
-            setRate(number);
-            if (refTokenAmount != 0) {
-                setAgainstTokenAmount(number * refTokenAmount);
-            } else if (refTokenAmount == 0 && againstTokenAmount != 0) {
-                setRefTokenAmount(againstTokenAmount / number);
-            }
-            return;
-        }
+        // if (lastChar === "0") {
+        //     setRateTextFieldError(false);
+        //     setRateTextFieldHtext("");
+        //     setRate(number);
+        //     if (refTokenAmount != 0) {
+        //         setAgainstTokenAmount(number * refTokenAmount);
+        //     } else if (refTokenAmount == 0 && againstTokenAmount != 0) {
+        //         setRefTokenAmount(againstTokenAmount / number);
+        //     }
+        //     return;
+        // }
         if (firstChar === "0" && secondChar !== ".") {
             setRateTextFieldError(false);
             setRateTextFieldHtext("");
@@ -532,41 +558,35 @@ const DexExchange = () => {
         }
     };
 
-    // const displayTempMessage = (message) => {
-    //     dispatchSnackBar(message);
-    //     dispatchSnackBarDisplay(true);
-    //     setTimeout(() => {
-    //         dispatchSnackBar("");
-    //         dispatchSnackBarDisplay(false);
-    //     }, 2000);
-    // };
-
     const handleMakeOrderClick = () => {
+        if (refTokenAmount === 0 || againstTokenAmount === 0 || rate === 0) {
+            displayTempMessage("Invalid input amount, cannot be 0");
+            return;
+        }
+
         if (buySellSelected === 0) {
             createLimitSellOrder(
                 allTokens[refTokenSelected].address,
-                refTokenAmount.toString(),
+                ethers.utils.parseEther(refTokenAmount).toString(),
                 allTokens[againstTokenSelected].address,
-                againstTokenAmount.toString(),
-                rate.toString(),
+                ethers.utils.parseEther(againstTokenAmount).toString(),
+                ethers.utils.parseEther(rate).toString(),
                 waiveFees,
                 (e) => {
                     displayTempMessage(e);
-                    dispatch({ type: INC_ORDER_COUNT });
                 },
                 (e) => {
                     displayTempMessage(e);
-                    dispatch({ type: INC_ORDER_COUNT });
                 },
                 displayTempMessage
             );
         } else {
             createLimitBuyOrder(
                 allTokens[refTokenSelected].address,
-                refTokenAmount.toString(),
+                ethers.utils.parseEther(refTokenAmount).toString(),
                 allTokens[againstTokenSelected].address,
-                againstTokenAmount.toString(),
-                rate.toString(),
+                ethers.utils.parseEther(againstTokenAmount).toString(),
+                ethers.utils.parseEther(rate).toString(),
                 waiveFees,
                 (e) => {
                     displayTempMessage(e);
@@ -581,18 +601,40 @@ const DexExchange = () => {
         }
     };
 
+    const calculatePairPrice = async () => {
+        const tokenA = await refTokenPrice;
+        const tokenB = await againstTokenPrice;
+
+        setPricePair(tokenA / tokenB);
+    };
+
     useEffect(() => {
         //should only be called on initiation
         dispatch({ type: SET_ALL_TOKENS, payload: data.tokens });
-
         // eslint-disable-next-line
     }, []);
 
+    useEffect(() => {
+        if (
+            refTokenSelected != null &&
+            againstTokenSelected != null &&
+            refTokenSelected != againstTokenSelected
+        ) {
+            calculatePairPrice();
+        }
+
+        const interval = setInterval(() => {
+            calculatePairPrice();
+            console.log("This will run every minute!");
+        }, 60000);
+        return () => clearInterval(interval);
+    }, [refTokenSelected, againstTokenSelected]);
+
     return (
-        <DexExchangeContainer>
+        <DexExchangeContainer id="workHistorySection">
             <div
                 style={{
-                    display: "flex",
+                    display: "inline-flex",
                     flexDirection: "column",
                     alignItems: "center",
                     width: "500px",
@@ -602,7 +644,8 @@ const DexExchange = () => {
                     backgroundColor: "#152149",
                     borderRadius: "10px",
                     marginTop: "10rem",
-                    marginLeft: "30rem",
+                    marginLeft: "5rem",
+                    marginRight: "1rem",
                 }}
             >
                 <Tabs
@@ -618,7 +661,7 @@ const DexExchange = () => {
                                 <Fab
                                     sx={{
                                         marginLeft: "220px",
-                                        marginTop: "15px",
+                                        marginTop: "8px",
                                         marginRight: "2px",
                                         width: "38px",
                                         height: "38px",
@@ -647,7 +690,7 @@ const DexExchange = () => {
                             height: "150px",
                             backgroundColor: "#131823",
                             width: "450px",
-                            marginTop: "50px",
+                            marginTop: "10px",
                             borderRadius: "10px",
                             display: "flex",
                             justifyContent: "center",
@@ -680,7 +723,7 @@ const DexExchange = () => {
                                         marginRight: "0",
                                     }}
                                 >
-                                    Balance:
+                                    Balance: {sellBalance}
                                 </Typography>
                             ) : null}
                         </div>
@@ -754,7 +797,7 @@ const DexExchange = () => {
                                     color: "#6c86ad !important",
                                 }}
                             >
-                                {refTokenSelected
+                                {refTokenSelected != null
                                     ? allTokens[refTokenSelected].name
                                     : null}
                             </Typography>
@@ -794,7 +837,7 @@ const DexExchange = () => {
                                         marginRight: "0",
                                     }}
                                 >
-                                    Balance:
+                                    Balance: {buyBalance}
                                 </Typography>
                             ) : null}
                         </div>
@@ -872,7 +915,7 @@ const DexExchange = () => {
                                     color: "#6c86ad !important",
                                 }}
                             >
-                                {againstTokenSelected
+                                {againstTokenSelected != null
                                     ? allTokens[againstTokenSelected].name
                                     : null}
                             </Typography>
@@ -889,7 +932,7 @@ const DexExchange = () => {
                     >
                         <Card
                             sx={{
-                                height: "90px",
+                                height: "120px",
                                 backgroundColor: "#131823",
                                 width: "100%",
                                 borderRadius: "10px",
@@ -909,38 +952,68 @@ const DexExchange = () => {
                                         paddingRight: "10px",
                                     }}
                                 >
-                                    {/* <Typography
+                                    <Typography
                                         sx={{
                                             fontSize: "13px !important",
                                             color: "#6c86ad !important",
                                             marginTop: "5px",
                                         }}
                                     >
-                                        {" "}
-                                        {rateState
-                                            ? `${
-                                                  sellTokens
-                                                      ? sellTokens[sellSelected]
-                                                            .symbol
-                                                      : ""
-                                              }/${
-                                                  buyTokens
-                                                      ? buyTokens[buySelected]
-                                                            .symbol
-                                                      : ""
-                                              }`
-                                            : `Price (${
-                                                  buyTokens
-                                                      ? buyTokens[buySelected]
-                                                            .symbol
-                                                      : ""
-                                              }/${
-                                                  sellTokens
-                                                      ? sellTokens[sellSelected]
-                                                            .symbol
-                                                      : ""
-                                              })`}{" "}
-                                    </Typography> */}
+                                        {refTokenSelected != null &&
+                                        againstTokenSelected != null &&
+                                        refTokenSelected !==
+                                            againstTokenSelected ? (
+                                            buySellSelected === 0 ? (
+                                                <Button
+                                                    sx={{
+                                                        height: "10px",
+                                                        marginTop: "5px",
+                                                        color: "white",
+                                                    }}
+                                                    onClick={() => {
+                                                        setRate(pricePair);
+                                                    }}
+                                                >
+                                                    Market Sell{" "}
+                                                    {
+                                                        allTokens[
+                                                            refTokenSelected
+                                                        ].symbol
+                                                    }{" "}
+                                                    rate at: {pricePair}{" "}
+                                                    {
+                                                        allTokens[
+                                                            againstTokenSelected
+                                                        ].symbol
+                                                    }
+                                                </Button>
+                                            ) : (
+                                                <Button
+                                                    sx={{
+                                                        height: "10px",
+                                                        marginTop: "5px",
+                                                        color: "white",
+                                                    }}
+                                                    onClick={() => {
+                                                        setRate(pricePair);
+                                                    }}
+                                                >
+                                                    Market Buy{" "}
+                                                    {
+                                                        allTokens[
+                                                            refTokenSelected
+                                                        ].symbol
+                                                    }{" "}
+                                                    rate at: {pricePair}{" "}
+                                                    {
+                                                        allTokens[
+                                                            againstTokenSelected
+                                                        ].symbol
+                                                    }
+                                                </Button>
+                                            )
+                                        ) : null}
+                                    </Typography>
                                 </div>
 
                                 <div
@@ -952,7 +1025,7 @@ const DexExchange = () => {
                                     <Button
                                         sx={{
                                             marginTop: "25px",
-                                            position: "fixed",
+                                            marginLeft: "20px",
                                         }}
                                     >
                                         rate
@@ -984,9 +1057,9 @@ const DexExchange = () => {
 
                     <FormControlLabel
                         control={<Switch sx={{}} onClick={handleWaiveFees} />}
-                        label="Waive Fees"
+                        label="Waive 0.1% Fee"
                         labelPlacement="start"
-                        sx={{ marginTop: "5px", marginBottom: "-8px" }}
+                        sx={{ marginTop: "5px" }}
                     />
 
                     {refTokenSelected != againstTokenSelected &&
@@ -1059,6 +1132,7 @@ const DexExchange = () => {
                     <B sx={{ height: "50px" }}></B>
                 </Dialog>
             </div>
+            <WorkHistory></WorkHistory>
         </DexExchangeContainer>
     );
 };

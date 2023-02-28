@@ -6,29 +6,6 @@ const { networkConfig } = require("../helper-hardhat-config");
 
 const addressProvider = process.env.REACT_APP_LENDINGPOOLADDRESSPROVIDER;
 
-// export async function getLendingPool() {
-//     const provider = new ethers.providers.Web3Provider(window.ethereum);
-//     const signer = provider.getSigner();
-
-//     const lendingPoolAddressesProvider = new ethers.Contract(
-//         addressProvider,
-//         ILendingPoolAddressProvider,
-//         signer
-//     );
-//     console.log(lendingPoolAddressesProvider.address);
-
-//     const lendingPoolAddress = await lendingPoolAddressesProvider.getPool();
-//     console.log(lendingPoolAddress);
-
-//     const lendingPool = new ethers.Contract(
-//         lendingPoolAddress,
-//         LendingPool.abi,
-//         signer
-//     );
-//     console.log("Lending Pool address: " + lendingPool.address);
-//     return lendingPool.address;
-// }
-
 export async function getDAIBalance(_account) {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const signer = provider.getSigner();

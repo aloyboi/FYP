@@ -6,6 +6,7 @@ import Navbar from "../components/Navbar";
 import Banner from "../components/Banner";
 import LendingPlatform from "../components/LendingPlatform";
 import WorkHistory from "../components/WorkHistory";
+import SnackBar from "../components/SnackBar";
 
 import GlobalStyle, {
     CryptoWrapper,
@@ -89,6 +90,8 @@ const Exchange = () => {
                         <ContentWrapper>
                             <Navbar></Navbar>
                             <DexExchange></DexExchange>
+
+                            <SnackBar />
                         </ContentWrapper>
                     </CryptoWrapper>
                 </>
@@ -121,8 +124,8 @@ const Exchange = () => {
 
                     <CryptoWrapper>
                         <ContentWrapper>
-                            <Navbar></Navbar>
-                            <LendingPlatform></LendingPlatform>
+                            <Navbar />
+                            <LendingPlatform />
                         </ContentWrapper>
                     </CryptoWrapper>
                 </>

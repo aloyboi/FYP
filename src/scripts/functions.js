@@ -35,28 +35,88 @@ export async function depositETH(_amount, callback, errorCallback) {
     }
 }
 
-export async function getBalance(_tokenAddress, callback) {
+export async function calculateTokenPrice(_token) {
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const signer = provider.getSigner();
+
+    const priceCheckerContract = new ethers.Contract(
+        priceCheckerAddress,
+        PriceChecker.abi,
+        signer
+    );
+
+    const tokenPrice = await priceCheckerContract.getPrice(_token);
+
+    console.log("price: " + tokenPrice.toString());
+    return tokenPrice.toString();
+}
+
+export async function getBalanceInMetamask(
+    _account,
+    _tokenAddress,
+    _decimals,
+    _symbol
+) {
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const signer = provider.getSigner();
+    let balance;
+
+    if (_symbol === "ETH") {
+        balance = await provider.getBalance(_account);
+        console.log("Balance: " + balance);
+        balance = ethers.utils.formatUnits(balance, _decimals);
+        console.log("Balance in decimals: " + balance);
+    } else {
+        const tokenContract = new ethers.Contract(
+            _tokenAddress,
+            IERC20.abi,
+            signer
+        );
+        balance = await tokenContract.balanceOf(_account);
+        console.log("Balance: " + balance);
+        balance = ethers.utils.formatUnits(balance, _decimals);
+        console.log("Balance in decimals: " + balance);
+    }
+
+    return balance;
+}
+
+export async function getBalance(_tokenAddress, _decimals, callback) {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const signer = provider.getSigner();
     const contract = new ethers.Contract(walletAddress, Wallet.abi, signer);
     let userAdd;
     try {
+        let balance;
+        let locked;
         userAdd = await signer.getAddress();
         const transactionResponse = await contract.balanceOf(
             _tokenAddress,
             userAdd //have to change
         );
-
         const lockedFunds = await contract.lockedFunds(userAdd, _tokenAddress);
-        let balance = transactionResponse / 10 ** decimals;
-        let locked = lockedFunds / 10 ** decimals;
+        if (_decimals == 18) {
+            balance = transactionResponse / 10 ** _decimals;
+            locked = lockedFunds / 10 ** _decimals;
+        } else {
+            balance = transactionResponse / 10 ** (18 - _decimals);
+            locked = lockedFunds / 10 ** (18 - _decimals);
+        }
 
         if (typeof callback == "function") {
             callback(balance, locked);
         }
-        return [balance, locked];
+        return { balance, locked };
     } catch (error) {
         console.log(error);
+        let balance, locked;
+        if (balance == undefined) {
+            balance = 0;
+        }
+        if (locked == undefined) {
+            locked = 0;
+        }
+        return { balance, locked };
     }
 }
 
@@ -178,7 +238,7 @@ export async function withdrawToken(
     }
 }
 
-//Direct from input as decimal values
+// In 18decimals already
 export async function createLimitBuyOrder(
     _tokenA,
     _amountA,
@@ -210,15 +270,20 @@ export async function createLimitBuyOrder(
                 `Order placed, order id:${orderId.toString()}`
             );
         }
-        const fillOrder = await exchange.matchOrders(_tokenA, orderId, "0");
+        const fillOrder = await exchange.matchOrders(
+            _tokenA,
+            _tokenB,
+            orderId,
+            "0"
+        );
         await fillOrder.wait();
         if (typeof callbackOrderFilled == "function") {
             callbackOrderFilled("We will attempt to fill your order");
         }
     } catch (error) {
         if (typeof errorCallback == "function") {
-            if (error.message.includes("Insufficient USDC")) {
-                errorCallback("Insufficient USDC");
+            if (error.message.includes("Insufficient Buyer Token Balance")) {
+                errorCallback("Insufficient Buyer Token Balance");
             } else if (error.message.includes("user rejected transaction")) {
                 errorCallback("Transaction Rejected");
             } else {
@@ -259,15 +324,20 @@ export async function createLimitSellOrder(
                 `Order placed, order id:${orderId.toString()}`
             );
         }
-        const fillOrder = await exchange.matchOrders(_tokenA, orderId, "1");
+        const fillOrder = await exchange.matchOrders(
+            _tokenA,
+            _tokenB,
+            orderId,
+            "1"
+        );
         await fillOrder.wait();
         if (typeof callbackOrderFilled == "function") {
             callbackOrderFilled("We will attempt to fill your order");
         }
     } catch (error) {
         if (typeof errorCallback == "function") {
-            if (error.message.includes("Insufficient tokens")) {
-                errorCallback("Insufficient tokens");
+            if (error.message.includes("Insufficient Seller Token Balance")) {
+                errorCallback("Insufficient Balance");
             } else if (error.message.includes("user rejected transaction")) {
                 errorCallback("Transaction Rejected");
             } else {
@@ -277,127 +347,169 @@ export async function createLimitSellOrder(
     }
 }
 
-export async function getUserOrdersByTypeAndToken(
-    _tokenAddress,
-    _side,
-    callback
-) {
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const signer = provider.getSigner();
-    const exchange = new ethers.Contract(exchangeAddress, Exchange.abi, signer);
-    let userOrder;
-    let orders = [];
-    let userAdd = await signer.getAddress();
-    try {
-        let length = await exchange.getOrderLength(_side, _tokenAddress);
-        for (let i = 0; i < length; i++) {
-            userOrder = await exchange.getOrder(_tokenAddress, i, _side);
-            if (userOrder[2] === userAdd) {
-                let decimalValA = await exchange.getTokenInfo(userOrder[3]); //tokenA
-                let decimalValB = await exchange.getTokenInfo(userOrder[5]); //tokenB
-
-                userOrder[0] = userOrder[0].toString();
-                userOrder[1] = userOrder[1].toString();
-                userOrder[4] = userOrder[4] / 10 ** (decimals - decimalValA);
-                userOrder[6] = userOrder[6] / 10 ** (decimals - decimalValB);
-                userOrder[7] = userOrder[7] / 10 ** decimals;
-                userOrder[8] = userOrder[8] / 10 ** (decimals - decimalValA);
-                userOrder[9] = userOrder[9] / 10 ** (decimals - decimalValB);
-
-                orders.push(userOrder);
-            }
-        }
-        if (typeof callback == "function") {
-            callback(orders);
-        }
-    } catch (error) {
-        console.log(error);
-    }
-}
-
-export async function getAllUserOrders(_tokenAddresses, callback) {
+export async function getAllUserBuyOrders(_tokenAddresses, callback) {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const signer = provider.getSigner();
     const exchange = new ethers.Contract(exchangeAddress, Exchange.abi, signer);
     let userOrder;
     let buyOrders = [];
-    let filledOrders = [];
-    let sellOrders = [];
 
     let length;
     let userAdd = await signer.getAddress();
     try {
         // get buy
         for (let j = 0; j < _tokenAddresses.length; j++) {
-            length = await exchange.getOrderLength("0", _tokenAddresses[j]);
+            //for each token
+            let tokenAddressA = _tokenAddresses[j];
 
-            for (let i = 0; i < length; i++) {
-                userOrder = await exchange.getOrder(_tokenAddresses[j], i, "0");
+            for (let k = 0; k < _tokenAddresses.length; k++) {
+                //tokenB
+                if (_tokenAddresses[k] == tokenAddressA) continue;
+                else {
+                    length = await exchange.getOrderLength(
+                        "0",
+                        tokenAddressA,
+                        _tokenAddresses[k]
+                    );
 
-                let modifiedBuyOrder = [];
-                // copy userOrder array to modifiedOrder so that we can modify it using spread operator
-                modifiedBuyOrder = [...userOrder];
+                    for (let i = 0; i < length; i++) {
+                        userOrder = await exchange.getOrder(
+                            tokenAddressA,
+                            _tokenAddresses[k],
+                            i,
+                            "0"
+                        );
 
-                if (userOrder[2] === userAdd) {
-                    let decimalValA = await exchange.getTokenInfo(userOrder[3]); //tokenA
-                    let decimalValB = await exchange.getTokenInfo(userOrder[5]); //tokenB
+                        let modifiedBuyOrder = [];
+                        // copy userOrder array to modifiedOrder so that we can modify it using spread operator
+                        modifiedBuyOrder = [...userOrder];
 
-                    modifiedBuyOrder[0] = modifiedBuyOrder[0].toString();
-                    modifiedBuyOrder[1] = modifiedBuyOrder[1].toString();
-                    modifiedBuyOrder[4] =
-                        modifiedBuyOrder[4] / 10 ** (decimals - decimalValA);
-                    modifiedBuyOrder[6] =
-                        modifiedBuyOrder[6] / 10 ** (decimals - decimalValB);
-                    modifiedBuyOrder[7] = modifiedBuyOrder[7] / 10 ** decimals;
-                    modifiedBuyOrder[8] =
-                        modifiedBuyOrder[8] / 10 ** (decimals - decimalValA);
-                    modifiedBuyOrder[9] =
-                        modifiedBuyOrder[9] / 10 ** (decimals - decimalValB);
+                        if (userOrder[2] === userAdd) {
+                            let decimalValA = await exchange.getTokenInfo(
+                                userOrder[3]
+                            ); //tokenA
+                            let decimalValB = await exchange.getTokenInfo(
+                                userOrder[5]
+                            ); //tokenB
 
-                    buyOrders.push(modifiedBuyOrder);
+                            modifiedBuyOrder[0] =
+                                modifiedBuyOrder[0].toString();
+                            modifiedBuyOrder[1] =
+                                modifiedBuyOrder[1].toString();
+                            modifiedBuyOrder[4] =
+                                modifiedBuyOrder[4] /
+                                10 ** (decimals - decimalValA);
+                            modifiedBuyOrder[6] =
+                                modifiedBuyOrder[6] /
+                                10 ** (decimals - decimalValB);
+                            modifiedBuyOrder[7] =
+                                modifiedBuyOrder[7] / 10 ** decimals;
+                            modifiedBuyOrder[8] =
+                                modifiedBuyOrder[8] /
+                                10 ** (decimals - decimalValA);
+                            modifiedBuyOrder[9] =
+                                modifiedBuyOrder[9] /
+                                10 ** (decimals - decimalValB);
+
+                            buyOrders.push(modifiedBuyOrder);
+                        }
+                    }
                 }
             }
         }
+        if (typeof callback == "function") {
+            callback(buyOrders);
+        }
+    } catch (error) {
+        console.log(error);
+    }
+}
 
+export async function getAllUserSellOrders(_tokenAddresses, callback) {
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const signer = provider.getSigner();
+    const exchange = new ethers.Contract(exchangeAddress, Exchange.abi, signer);
+    let userOrder;
+    let sellOrders = [];
+
+    let userAdd = await signer.getAddress();
+
+    try {
         for (let j = 0; j < _tokenAddresses.length; j++) {
-            let sellLength = await exchange.getOrderLength(
-                "1",
-                _tokenAddresses[j]
-            );
+            //for each token
+            let tokenAddressA = _tokenAddresses[j];
 
-            for (let i = 0; i < sellLength; i++) {
-                let userSellOrder = await exchange.getOrder(
-                    _tokenAddresses[j],
-                    i,
-                    "1"
-                );
+            for (let k = 0; k < _tokenAddresses.length; k++) {
+                //tokenB
+                if (_tokenAddresses[k] == tokenAddressA) continue;
+                else {
+                    let sellLength = await exchange.getOrderLength(
+                        "1",
+                        tokenAddressA,
+                        _tokenAddresses[k]
+                    );
 
-                // copy userOrder array to modifiedOrder so that we can modify it using spread operator
-                let modifiedSellOrder = [];
-                modifiedSellOrder = [...userSellOrder];
+                    for (let i = 0; i < sellLength; i++) {
+                        let userSellOrder = await exchange.getOrder(
+                            tokenAddressA,
+                            _tokenAddresses[k],
+                            i,
+                            "1"
+                        );
 
-                if (userSellOrder[2] === userAdd) {
-                    let decimalValA = await exchange.getTokenInfo(userOrder[3]); //tokenA
-                    let decimalValB = await exchange.getTokenInfo(userOrder[5]); //tokenB
+                        // copy userOrder array to modifiedOrder so that we can modify it using spread operator
+                        let modifiedSellOrder = [];
+                        modifiedSellOrder = [...userSellOrder];
 
-                    modifiedSellOrder[0] = modifiedSellOrder[0].toString();
-                    modifiedSellOrder[1] = modifiedSellOrder[1].toString();
-                    modifiedSellOrder[4] =
-                        modifiedSellOrder[4] / 10 ** (decimals - decimalValA);
-                    modifiedSellOrder[6] =
-                        modifiedSellOrder[6] / 10 ** (decimals - decimalValB);
-                    modifiedSellOrder[7] =
-                        modifiedSellOrder[7] / 10 ** decimals;
-                    modifiedSellOrder[8] =
-                        modifiedSellOrder[8] / 10 ** (decimals - decimalValA);
-                    modifiedSellOrder[9] =
-                        modifiedSellOrder[9] / 10 ** (decimals - decimalValB);
+                        if (userSellOrder[2] === userAdd) {
+                            let decimalValA = await exchange.getTokenInfo(
+                                userOrder[3]
+                            ); //tokenA
+                            let decimalValB = await exchange.getTokenInfo(
+                                userOrder[5]
+                            ); //tokenB
 
-                    sellOrders.push(modifiedSellOrder);
+                            modifiedSellOrder[0] =
+                                modifiedSellOrder[0].toString();
+                            modifiedSellOrder[1] =
+                                modifiedSellOrder[1].toString();
+                            modifiedSellOrder[4] =
+                                modifiedSellOrder[4] /
+                                10 ** (decimals - decimalValA);
+                            modifiedSellOrder[6] =
+                                modifiedSellOrder[6] /
+                                10 ** (decimals - decimalValB);
+                            modifiedSellOrder[7] =
+                                modifiedSellOrder[7] / 10 ** decimals;
+                            modifiedSellOrder[8] =
+                                modifiedSellOrder[8] /
+                                10 ** (decimals - decimalValA);
+                            modifiedSellOrder[9] =
+                                modifiedSellOrder[9] /
+                                10 ** (decimals - decimalValB);
+
+                            sellOrders.push(modifiedSellOrder);
+                        }
+                    }
                 }
             }
+            if (typeof callback == "function") {
+                callback(sellOrders);
+            }
         }
+    } catch (error) {
+        console.log(error);
+    }
+}
 
+export async function getAllUserFilledOrders(_tokenAddresses, callback) {
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const signer = provider.getSigner();
+    const exchange = new ethers.Contract(exchangeAddress, Exchange.abi, signer);
+    let userOrder;
+    let filledOrders = [];
+    let userAdd = await signer.getAddress();
+    try {
         let filledBuyLength = await exchange.getFilledOrderLength(userAdd, "0");
         for (let i = 0; i < filledBuyLength; i++) {
             userOrder = await exchange.getFilledOrder(userAdd, "0", i);
@@ -451,11 +563,8 @@ export async function getAllUserOrders(_tokenAddresses, callback) {
             filledOrders.push(modifiedFilledOrder);
         }
 
-        console.log(buyOrders);
-        console.log(sellOrders);
-        console.log(filledOrders);
         if (typeof callback == "function") {
-            callback(buyOrders, sellOrders, filledOrders);
+            callback(filledOrders);
         }
     } catch (error) {
         console.log(error);
@@ -463,7 +572,8 @@ export async function getAllUserOrders(_tokenAddresses, callback) {
 }
 
 export async function cancelOrder(
-    _tokenAddress,
+    _tokenA,
+    _tokenB,
     _orderId,
     _side,
     callback,
@@ -484,9 +594,15 @@ export async function cancelOrder(
             Exchange.abi,
             signer
         );
-        const tx = await exchange.cancelOrder(side, _orderId, _tokenAddress, {
-            gasLimit: 250000,
-        });
+        const tx = await exchange.cancelOrder(
+            side,
+            _orderId,
+            _tokenA,
+            _tokenB,
+            {
+                gasLimit: 250000,
+            }
+        );
         await tx.wait();
         if (typeof callback == "function") {
             callback();
@@ -503,7 +619,7 @@ export async function cancelOrder(
     }
 }
 
-export async function getOrderBookByToken(_tokenAddress, callback) {
+export async function getOrderBookByTokenPairs(_tokenA, _tokenB, callback) {
     let buyOrders = [];
     let sellOrders = [];
     let length;
@@ -513,11 +629,11 @@ export async function getOrderBookByToken(_tokenAddress, callback) {
     const exchange = new ethers.Contract(exchangeAddress, Exchange.abi, signer);
 
     try {
-        length = await exchange.getOrderLength("0", _tokenAddress);
+        length = await exchange.getOrderLength("0", _tokenA, _tokenB);
         let modifiedOrder = [];
 
         for (let i = 0; i < length; i++) {
-            let order = await exchange.getOrder(_tokenAddress, i, "0");
+            let order = await exchange.getOrder(_tokenA, _tokenB, i, "0");
             modifiedOrder = [...order];
 
             let decimalValA = await exchange.getTokenInfo(userOrder[3]); //tokenA
@@ -536,10 +652,10 @@ export async function getOrderBookByToken(_tokenAddress, callback) {
             buyOrders.push(modifiedOrder);
         }
 
-        length = await exchange.getOrderLength("1", _tokenAddress);
+        length = await exchange.getOrderLength("1", _tokenA, _tokenB);
 
         for (let i = 0; i < length; i++) {
-            let order = await exchange.getOrder(_tokenAddress, i, "1");
+            let order = await exchange.getOrder(_tokenA, _tokenB, i, "1");
             modifiedOrder = [...order];
 
             let decimalValA = await exchange.getTokenInfo(userOrder[3]); //tokenA
@@ -598,6 +714,7 @@ export const getTokenList = async (callback) => {
         for (let i = 0; i < tokens.length; i++) {
             tokenList.append(tokens[i].add);
         }
+        return tokenList;
     } catch (error) {
         console.log(error);
         callback(tokenList);
