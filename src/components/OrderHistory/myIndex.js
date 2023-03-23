@@ -29,6 +29,9 @@ export default function StickyHeadTable(props) {
     const sellRows = useSelector((state) => state.orders.user_sell_orders);
     const filledRows = useSelector((state) => state.orders.user_filled_orders);
     const curr = useSelector((state) => state.account.address);
+    const refToken = useSelector((state) => state.token.curr_ref_token);
+    const againstToken = useSelector((state) => state.token.curr_against_token);
+    const allToken = useSelector((state) => state.token.all_tokens);
     const myOrderTypeSelected = useSelector(
         (state) => state.tabValue.myOrderTypeSelected
     );
@@ -42,13 +45,23 @@ export default function StickyHeadTable(props) {
         setPage(0);
     };
 
-    const handleCancelOrder = (event) => {
+    const handleCancelOrder = (side, tokenA, tokenB, ordID) => {
         displayTempMessage("Cancelling Order");
+        let tokenA_add = allToken.filter((token) => token.symbol === tokenA)[0]
+            .address;
+        let tokenB_add = allToken.filter((token) => token.symbol === tokenB)[0]
+            .address;
+        console.log(tokenA_add);
+        console.log(tokenB_add);
+        console.log(ordID);
+        console.log(side);
+
         cancelOrder(
-            event.target.getAttribute("tokenA"),
-            event.target.getAttribute("tokenB"),
-            event.target.id,
-            event.target.value,
+            tokenA_add,
+            tokenB_add,
+            ordID,
+            side,
+
             (e) => {
                 dispatch({ type: SET_IS_ANY_ORDER_CANCELLED, payload: true });
                 displayTempMessage("Order Cancelled");
@@ -80,38 +93,38 @@ export default function StickyHeadTable(props) {
 
     const buyColumns = [
         {
-            id: "id",
+            id: "orderId",
             label: "Order ID",
             minWidth: 130,
-            align: "right",
+            align: "center",
             format: (value) => value.toLocaleString("en-US"),
         },
         {
-            id: "tokenNameA",
+            id: "tokenA",
             label: "Buy Token",
             minWidth: 130,
-            align: "right",
+            align: "center",
             format: (value) => value.toLocaleString("en-US"),
         },
         {
-            id: "tokenNameB",
+            id: "tokenB",
             label: "Sell Token",
             minWidth: 130,
-            align: "right",
+            align: "center",
             format: (value) => value.toLocaleString("en-US"),
         },
         {
-            id: "amount",
+            id: "amountA",
             label: "Amount Remaining",
             minWidth: 130,
-            align: "right",
+            align: "center",
             format: (value) => value.toLocaleString("en-US"),
         },
         {
-            id: "originalAmount",
+            id: "originalAmountA",
             label: "Amount Original",
             minWidth: 130,
-            align: "right",
+            align: "center",
             format: (value) => value.toLocaleString("en-US"),
         },
 
@@ -119,52 +132,52 @@ export default function StickyHeadTable(props) {
             id: "rate",
             label: "Rate",
             minWidth: 130,
-            align: "right",
+            align: "center",
             format: (value) => value.toLocaleString("en-US"),
         },
         {
-            id: "waivefees",
+            id: "waiveFees",
             label: "Opt Waive Fees",
             minWidth: 130,
-            align: "right",
+            align: "center",
             format: (value) => value.toLocaleString("en-US"),
         },
     ];
 
     const sellColumns = [
         {
-            id: "id",
+            id: "orderId",
             label: "Order ID",
             minWidth: 130,
-            align: "right",
+            align: "center",
             format: (value) => value.toLocaleString("en-US"),
         },
         {
-            id: "tokenNameA",
+            id: "tokenA",
             label: "Sell Token",
             minWidth: 130,
-            align: "right",
+            align: "center",
             format: (value) => value.toLocaleString("en-US"),
         },
         {
-            id: "tokenNameB",
+            id: "tokenB",
             label: "Buy Token",
             minWidth: 130,
-            align: "right",
+            align: "center",
             format: (value) => value.toLocaleString("en-US"),
         },
         {
-            id: "amount",
+            id: "amountA",
             label: "Amount Remaining",
             minWidth: 130,
-            align: "right",
+            align: "center",
             format: (value) => value.toLocaleString("en-US"),
         },
         {
-            id: "originalAmount",
+            id: "originalAmountA",
             label: "Amount Original",
             minWidth: 130,
-            align: "right",
+            align: "center",
             format: (value) => value.toLocaleString("en-US"),
         },
 
@@ -172,14 +185,14 @@ export default function StickyHeadTable(props) {
             id: "rate",
             label: "Rate",
             minWidth: 130,
-            align: "right",
+            align: "center",
             format: (value) => value.toLocaleString("en-US"),
         },
         {
-            id: "waivefees",
+            id: "waiveFees",
             label: "Opt Waive Fees",
             minWidth: 130,
-            align: "right",
+            align: "center",
             format: (value) => value.toLocaleString("en-US"),
         },
     ];
@@ -189,63 +202,63 @@ export default function StickyHeadTable(props) {
             id: "id",
             label: "From Order ID",
             minWidth: 130,
-            align: "right",
+            align: "center",
             format: (value) => value.toLocaleString("en-US"),
         },
         {
             id: "type",
             label: "Order Type",
             minWidth: 130,
-            align: "right",
+            align: "center",
             format: (value) => value.toLocaleString("en-US"),
         },
         {
             id: "tokenNameA",
             label: "For Token",
             minWidth: 130,
-            align: "right",
+            align: "center",
             format: (value) => value.toLocaleString("en-US"),
         },
         {
             id: "tokenNameB",
             label: "Against Token",
             minWidth: 130,
-            align: "right",
+            align: "center",
             format: (value) => value.toLocaleString("en-US"),
         },
         {
             id: "amountFilled",
             label: "Amount Filled",
             minWidth: 130,
-            align: "right",
+            align: "center",
             format: (value) => value.toLocaleString("en-US"),
         },
         {
             id: "fillRate",
             label: "Rate filled",
             minWidth: 130,
-            align: "right",
+            align: "center",
             format: (value) => value.toLocaleString("en-US"),
         },
         {
             id: "originalRate",
             label: "Original Rate",
             minWidth: 130,
-            align: "right",
+            align: "center",
             format: (value) => value.toLocaleString("en-US"),
         },
         {
             id: "waivefees",
             label: "Opt Waive Fees",
             minWidth: 130,
-            align: "right",
+            align: "center",
             format: (value) => value.toLocaleString("en-US"),
         },
         {
             id: "fees",
             label: "Fees paid (USD)",
             minWidth: 130,
-            align: "right",
+            align: "center",
             format: (value) => value.toLocaleString("en-US"),
         },
     ];
@@ -284,7 +297,7 @@ export default function StickyHeadTable(props) {
                                         zIndex: "0",
                                     }}
                                     key={"cancel"}
-                                    align={"right"}
+                                    align={"center"}
                                     style={{ minWidth: 130 }}
                                 ></TableCell>
                             </TableRow>
@@ -301,8 +314,7 @@ export default function StickyHeadTable(props) {
                                               <TableRow
                                                   hover
                                                   role="checkbox"
-                                                  tabIndex={-1}
-                                                  key={rows.prices}
+                                                  key={rows.orderId}
                                               >
                                                   {buyColumns.map((column) => {
                                                       const value =
@@ -332,7 +344,8 @@ export default function StickyHeadTable(props) {
                                                           color: "white",
                                                       }}
                                                       key={"cancel"}
-                                                      align={"right"}
+                                                      align={"center"}
+                                                      style={{ minWidth: 130 }}
                                                   >
                                                       <Button
                                                           variant="contained"
@@ -346,8 +359,13 @@ export default function StickyHeadTable(props) {
                                                           token-address={
                                                               rows.tokenAddress
                                                           }
-                                                          onClick={
-                                                              handleCancelOrder
+                                                          onClick={() =>
+                                                              handleCancelOrder(
+                                                                  0,
+                                                                  rows.tokenA,
+                                                                  rows.tokenB,
+                                                                  rows.orderId
+                                                              )
                                                           }
                                                       >
                                                           Cancel
@@ -361,7 +379,7 @@ export default function StickyHeadTable(props) {
                         {buyRows ? (
                             buyRows.length === 0 ? (
                                 <Typography sx={{ marginTop: "10px" }}>
-                                    No Orders Made Yet
+                                    No Buy Orders Made Yet
                                 </Typography>
                             ) : null
                         ) : null}
@@ -408,7 +426,7 @@ export default function StickyHeadTable(props) {
                                         zIndex: "0",
                                     }}
                                     key={"cancel"}
-                                    align={"right"}
+                                    align={"center"}
                                     style={{ minWidth: 130 }}
                                 ></TableCell>
                             </TableRow>
@@ -425,8 +443,7 @@ export default function StickyHeadTable(props) {
                                               <TableRow
                                                   hover
                                                   role="checkbox"
-                                                  tabIndex={-1}
-                                                  key={rows.prices}
+                                                  key={rows.orderId}
                                               >
                                                   {sellColumns.map((column) => {
                                                       const value =
@@ -456,7 +473,7 @@ export default function StickyHeadTable(props) {
                                                           color: "white",
                                                       }}
                                                       key={"cancel"}
-                                                      align={"right"}
+                                                      align={"center"}
                                                   >
                                                       <Button
                                                           variant="contained"
@@ -470,8 +487,13 @@ export default function StickyHeadTable(props) {
                                                           token-address={
                                                               rows.tokenAddress
                                                           }
-                                                          onClick={
-                                                              handleCancelOrder
+                                                          onClick={() =>
+                                                              handleCancelOrder(
+                                                                  1,
+                                                                  rows.tokenA,
+                                                                  rows.tokenB,
+                                                                  rows.orderId
+                                                              )
                                                           }
                                                       >
                                                           Cancel
@@ -485,7 +507,7 @@ export default function StickyHeadTable(props) {
                         {sellRows ? (
                             sellRows.length === 0 ? (
                                 <Typography sx={{ marginTop: "10px" }}>
-                                    No Orders Made Yet
+                                    No Sell Orders Made Yet
                                 </Typography>
                             ) : null
                         ) : null}
@@ -539,7 +561,6 @@ export default function StickyHeadTable(props) {
                                               <TableRow
                                                   hover
                                                   role="checkbox"
-                                                  tabIndex={-1}
                                                   key={rows.prices}
                                               >
                                                   {filledColumns.map(
@@ -577,7 +598,7 @@ export default function StickyHeadTable(props) {
                         {filledRows ? (
                             filledRows.length === 0 ? (
                                 <Typography sx={{ marginTop: "10px" }}>
-                                    No Orders Made Yet
+                                    No Orders Filled Yet
                                 </Typography>
                             ) : null
                         ) : null}

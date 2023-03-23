@@ -3,6 +3,7 @@ import NextImage from "../../common/components/NextImage";
 import Button from "../../common/components/Button";
 import Heading from "../../common/components/Heading";
 import Container from "../../common/components/UI/Container";
+import TextField from "@mui/material/TextField";
 import Input from "../../common/components/Input";
 import MaxButton from "../../common/components/MaxButton";
 //import InputGroup from "../../common/components/InputGroup";
@@ -30,6 +31,7 @@ import {
 } from "../../scripts/aaveLend";
 import { SET_INTEREST_RATE } from "../../redux/redux-actions/actions";
 import bannerImg from "../../common/assets/image/cryptoModern/banner-bg.png";
+import { display, margin, marginTop } from "styled-system";
 
 //const lendingPool = process.env.REACT_APP_LENDINGPOOLADDRESSV2; //Aave Lending Pool Address that we will be using
 const lendingPool = process.env.REACT_APP_LENDINGPOOLADDRESSV3;
@@ -135,10 +137,6 @@ const LendingPlatform = () => {
         }
     };
 
-    const onClickWhitePaper = async () => {
-        window.location.href = "https://docs.aave.com/hub/";
-    };
-
     return (
         <BannerWrapper id="LendingPlatform">
             <Container>
@@ -156,7 +154,7 @@ const LendingPlatform = () => {
                     <DiscountLabel>
                         <Text
                             className="discountAmount"
-                            content="Total Deposit: "
+                            content="Total Deposit + Interest: "
                         />
                         <Text
                             className="discountText"
@@ -180,7 +178,7 @@ const LendingPlatform = () => {
                     <DiscountLabel>
                         <Text
                             className="discountAmount"
-                            content="Balance DAI:"
+                            content="Balance DAI in Metamask:"
                         />
                         <Text
                             className="discountText"
@@ -208,17 +206,14 @@ const LendingPlatform = () => {
                                         content="Deposit Amount: "
                                         className="discountAmount"
                                     ></Text>
-                                    {/* <Input
-                                    inputType="text"
-                                    value={amountToDeposit}
-                                ></Input> */}
+
                                     <input
                                         type="text"
                                         value={amountToDeposit}
                                         onChange={(e) =>
                                             setAmountToDeposit(e.target.value)
                                         }
-                                    />
+                                    ></input>
                                     <MaxButton
                                         className="text"
                                         variant="textButton"

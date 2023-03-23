@@ -112,25 +112,26 @@ const Navbar = () => {
         dispatch({ type: SET_DEPOSIT_AMOUNT, payload: totalCollateralDAI });
     };
 
-    async function getBal() {
-        if (tokensTab === "0") {
-            const { balance, locked } = await getBalance(
-                allTokens[selectedToken].address,
-                allTokens[selectedToken].decimals
-            );
-            console.log("balance: " + balance);
-            console.log("locked: " + locked);
-            setTokenBalance(balance);
-            setTokenLockedBalance(locked);
-            return balance;
-        } else {
-            console.log("attempting to read: ");
-            const { balance } = await getBalance(
-                aDAIData[0].address,
-                aDAIData[0].decimals
-            );
-            setADAIBalance(balance);
-            return balance;
+    async function getBal(value) {
+        if (curr != null) {
+            if (tokensTab === "0") {
+                const { balance, locked } = await getBalance(
+                    allTokens[value].address,
+                    allTokens[value].decimals
+                );
+                console.log("balance: " + balance);
+                console.log("locked: " + locked);
+                setTokenBalance(balance);
+                setTokenLockedBalance(locked);
+                return balance;
+            } else {
+                const { balance } = await getBalance(
+                    aDAIData.tokens[0].address,
+                    aDAIData.tokens[0].decimals
+                );
+                setADAIBalance(balance);
+                return balance;
+            }
         }
     }
 
@@ -301,12 +302,14 @@ const Navbar = () => {
                     allTokens[selectedToken].symbol
                 );
             } else {
+                console.log();
                 balanceInMetamask = await getBalanceInMetamask(
                     curr,
-                    aDAIData[0].address,
-                    aDAIData[0].decimals,
-                    aDAIData[0].symbol
+                    aDAIData.tokens[0].address,
+                    aDAIData.tokens[0].decimals,
+                    aDAIData.tokens[0].symbol
                 );
+                console.log("balance in Metamask: " + balanceInMetamask);
             }
 
             if (parseFloat(amount) > parseFloat(balanceInMetamask)) {
@@ -335,12 +338,12 @@ const Navbar = () => {
                     depositETH(
                         amount,
                         (e) => {
-                            getBal();
+                            getBal(selectedToken);
                             displayTempMessage("Deposit Successful");
                         },
                         displayTempMessage
                     );
-                    getBal();
+                    getBal(selectedToken);
                     setAmount(0);
                 } else {
                     depositToken(
@@ -348,7 +351,7 @@ const Navbar = () => {
                         amount,
                         allTokens[selectedToken].decimals,
                         (e) => {
-                            getBal();
+                            getBal(selectedToken);
                             displayTempMessage("Deposit Successful");
                         },
                         displayTempMessage,
@@ -358,16 +361,16 @@ const Navbar = () => {
                             );
                         }
                     );
-                    getBal();
+                    getBal(selectedToken);
                     setAmount(0);
                 }
             } else {
                 depositToken(
-                    aDAIData[0].address,
+                    aDAIData.tokens[0].address,
                     amount,
-                    aDAIData[0].decimals,
+                    aDAIData.tokens[0].decimals,
                     (e) => {
-                        getBal();
+                        getBal(selectedToken);
                         displayTempMessage("Deposit aDAI Successful");
                     },
                     displayTempMessage,
@@ -377,7 +380,7 @@ const Navbar = () => {
                         );
                     }
                 );
-                getBal();
+                getBal(selectedToken);
                 setAmount(0);
             }
         } else {
@@ -387,12 +390,12 @@ const Navbar = () => {
                     withdrawETH(
                         amount,
                         (e) => {
-                            getBal();
+                            getBal(selectedToken);
                             displayTempMessage("Withdraw Successful");
                         },
                         displayTempMessage
                     );
-                    getBal();
+                    getBal(selectedToken);
                     setAmount(0);
                 } else {
                     withdrawToken(
@@ -400,26 +403,26 @@ const Navbar = () => {
                         amount,
                         allTokens[selectedToken].decimals,
                         (e) => {
-                            getBal();
+                            getBal(selectedToken);
                             displayTempMessage("Withdraw Successful");
                         },
                         displayTempMessage
                     );
-                    getBal();
+                    getBal(selectedToken);
                     setAmount(0);
                 }
             } else {
                 withdrawToken(
-                    aDAIData[0].address,
+                    aDAIData.tokens[0].address,
                     amount,
-                    aDAIData[0].decimals,
+                    aDAIData.tokens[0].decimals,
                     (e) => {
-                        getBal();
+                        getBal(selectedToken);
                         displayTempMessage("Withdrawal of aDAi Successful");
                     },
                     displayTempMessage
                 );
-                getBal();
+                getBal(selectedToken);
                 setAmount(0);
             }
         }
@@ -470,12 +473,16 @@ const Navbar = () => {
 
     const handleTokensTabChange = (event, newValue) => {
         setTokensTab(newValue);
+        getBal(selectedToken);
     };
 
     useEffect(() => {
-        console.log(tabValue);
+        if (curr != null) {
+            getBal(selectedToken);
+        }
+
         checkIfAccountChanged();
-    }, []);
+    }, [curr]);
 
     const clickHandler = () => {
         if (currentAccount === "") {
@@ -498,9 +505,17 @@ const Navbar = () => {
                         onChange={handleTabChange}
                         sx={{ height: "40px" }}
                     >
-                        <Tab label="Home" value="0" />
-                        <Tab label="Decentralized Exchange" value="1" />
-                        <Tab label="Lending Platform" value="2" />
+                        <Tab label="Home" value="0" sx={{ color: "grey" }} />
+                        <Tab
+                            label="Decentralized Exchange"
+                            value="1"
+                            sx={{ color: "grey" }}
+                        />
+                        <Tab
+                            label="Lending Platform"
+                            value="2"
+                            sx={{ color: "grey" }}
+                        />
                     </Tabs>
                 </MenuArea>
                 <MenuArea style={{ position: "fixed", marginLeft: "750px" }}>
@@ -856,7 +871,11 @@ const Navbar = () => {
                                                                 padding:
                                                                     "0 0 4px 0",
                                                             }}
-                                                            onClick={getBal}
+                                                            onClick={() => {
+                                                                getBal(
+                                                                    selectedToken
+                                                                );
+                                                            }}
                                                         >
                                                             <io.IoIosRefresh
                                                                 style={{
@@ -1160,7 +1179,11 @@ const Navbar = () => {
                                                                 padding:
                                                                     "0 0 4px 0",
                                                             }}
-                                                            onClick={getBal}
+                                                            onClick={() => {
+                                                                getBal(
+                                                                    selectedToken
+                                                                );
+                                                            }}
                                                         >
                                                             <io.IoIosRefresh
                                                                 style={{
@@ -1207,7 +1230,7 @@ const Navbar = () => {
                                                                     color: "white",
                                                                 }}
                                                             >
-                                                                {tokenBalance}
+                                                                {aDAIBalance}
                                                             </Card>
                                                         </Typography>
                                                     </Card>
@@ -1224,7 +1247,7 @@ const Navbar = () => {
                 <MenuArea style={{ position: "fixed", marginLeft: "900px" }}>
                     <Button
                         className="trail"
-                        title={currentAccount || "Not Connected"}
+                        title={currentAccount || "Connect Wallet"}
                         type="button"
                         onClick={clickHandler}
                     ></Button>

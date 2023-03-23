@@ -3,14 +3,14 @@ import ReactDOM from "react-dom";
 import "./index.css";
 import { Provider } from "react-redux";
 import { store } from "./redux/Store";
-import Exchange from "./pages/exchange";
+import LendDEXchange from "./pages/LendDEXchange";
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 ReactDOM.render(
     <React.StrictMode>
         <Provider store={store}>
-            <Exchange></Exchange>
+            <LendDEXchange></LendDEXchange>
         </Provider>
     </React.StrictMode>,
     document.getElementById("root")

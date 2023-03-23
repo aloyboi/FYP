@@ -23,7 +23,8 @@ contract Exchange is Ownable {
     _tokenInfo[] public tokenList;
 
     //s_orderBook mappping: tokenA Address -> tokenB Address -> Side -> Order Array
-    mapping(address => mapping( address => mapping(uint256 => _Order[]))) public s_orderBook;
+    mapping(address => mapping(address => mapping(uint256 => _Order[])))
+        public s_orderBook;
 
     mapping(address => mapping(uint256 => _filledOrder[]))
         public s_filledOrders;
@@ -147,7 +148,7 @@ contract Exchange is Ownable {
             "Insufficient Funds"
         );
 
-        wallet.updateLockedFunds(msg.sender, _tokenB, _amountB, true);
+        wallet.exchangeUpdateLockedFunds(msg.sender, _tokenB, _amountB, true);
 
         s_orderBook[_tokenA][_tokenB][uint256(Side.BUY)].push(
             _Order(
@@ -199,7 +200,7 @@ contract Exchange is Ownable {
         );
 
         //Lock the funds (tokens) in the wallet
-        wallet.updateLockedFunds(msg.sender, _tokenA, _amountA, true);
+        wallet.exchangeUpdateLockedFunds(msg.sender, _tokenA, _amountA, true);
 
         s_orderBook[_tokenA][_tokenB][uint256(Side.SELL)].push(
             _Order(
@@ -239,7 +240,12 @@ contract Exchange is Ownable {
         uint256 _id,
         address _tokenA,
         address _tokenB
-    ) public validOrder(_id, side, _tokenA, _tokenB) validToken(_tokenA) validToken(_tokenB) {
+    )
+        public
+        validOrder(_id, side, _tokenA, _tokenB)
+        validToken(_tokenA)
+        validToken(_tokenB)
+    {
         uint256 _side = uint256(side);
         _Order[] storage _order = s_orderBook[_tokenA][_tokenB][_side];
         uint256 size = _order.length;
@@ -260,14 +266,14 @@ contract Exchange is Ownable {
 
             //Unlock funds
             if (side == Side.BUY) {
-                wallet.updateLockedFunds(
+                wallet.exchangeUpdateLockedFunds(
                     msg.sender,
                     order.tokenB,
                     order.amountB,
                     false
                 );
             } else if (side == Side.SELL) {
-                wallet.updateLockedFunds(
+                wallet.exchangeUpdateLockedFunds(
                     msg.sender,
                     order.tokenA,
                     order.amountA,
@@ -305,7 +311,12 @@ contract Exchange is Ownable {
         address _tokenA,
         address _tokenB,
         _fillOrderValues memory a
-    ) internal validOrder(_id, side, _tokenA, _tokenB) validToken(_tokenA) validToken(_tokenB) {
+    )
+        internal
+        validOrder(_id, side, _tokenA, _tokenB)
+        validToken(_tokenA)
+        validToken(_tokenB)
+    {
         uint256 _side = uint256(side);
         (_Order memory order, uint256 index) = getOrderFromArray(
             _tokenA,
@@ -327,7 +338,7 @@ contract Exchange is Ownable {
             a.amount,
             a.rate,
             order.tokenB
-        ); 
+        );
         bool feesWaived = order.waiveFees &&
             tradingFees.checkSufficientaDAI(fees, order.user);
 
@@ -341,7 +352,7 @@ contract Exchange is Ownable {
 
         if (order.amountA == 0) {
             s_isManual = false;
-            cancelOrder(side, order.id, order.tokenA, order.tokenB); //remove filled orders 
+            cancelOrder(side, order.id, order.tokenA, order.tokenB); //remove filled orders
             s_isManual = true;
         }
     }
@@ -356,30 +367,49 @@ contract Exchange is Ownable {
         if (feesWaived) {
             //Deduct aDAI
             uint256 aDAIToDeduct = tradingFees.amountaDAIToDeduct(fees);
-            wallet.updateBalance(
+            wallet.exchangeUpdateBalance(
                 tradingFees.aDAI(),
                 order.user,
                 aDAIToDeduct,
                 false
             );
+            wallet.exchangeUpdateBalance(
+                tradingFees.aDAI(),
+                wallet.fundWallet(),
+                aDAIToDeduct,
+                true
+            );
+
             //Credit Bought tokens
-            wallet.updateBalance(order.tokenA, order.user, _amount, true);
+            wallet.exchangeUpdateBalance(
+                order.tokenA,
+                order.user,
+                _amount,
+                true
+            );
         } else {
             uint256 amountTokenToDeduct = tradingFees.amountTokensToDeduct(
                 order.tokenA,
                 fees
             );
             //Credit Bought tokens after minusing fees
-            wallet.updateBalance(
+            wallet.exchangeUpdateBalance(
                 order.tokenA,
                 order.user,
                 _amount.sub(amountTokenToDeduct),
                 true
             );
+
+            wallet.exchangeUpdateBalance(
+                order.tokenA,
+                wallet.fundWallet(),
+                amountTokenToDeduct,
+                true
+            );
         }
 
         //Original Locked Funds unlocked
-        wallet.updateLockedFunds(
+        wallet.exchangeUpdateLockedFunds(
             order.user,
             order.tokenB,
             (order.rate.mul(_amount)).div(decimals),
@@ -388,13 +418,13 @@ contract Exchange is Ownable {
 
         //buyer update
         //Buyer balance deducted from what he paid
-        wallet.updateBalance(
+        wallet.exchangeUpdateBalance(
             order.tokenB,
             order.user,
             (_rate.mul(_amount)).div(decimals),
             false
         );
-        
+
         s_filledOrders[order.user][0].push(
             _filledOrder(
                 order.id,
@@ -423,9 +453,21 @@ contract Exchange is Ownable {
         if (feesWaived) {
             //Deduct aDAI
             uint256 aDAIToDeduct = tradingFees.amountaDAIToDeduct(fees);
-            wallet.updateBalance(tradingFees.aDAI(), order.user, aDAIToDeduct, false);
+            wallet.exchangeUpdateBalance(
+                tradingFees.aDAI(),
+                order.user,
+                aDAIToDeduct,
+                false
+            );
+            wallet.exchangeUpdateBalance(
+                tradingFees.aDAI(),
+                wallet.fundWallet(),
+                aDAIToDeduct,
+                true
+            );
+
             //Credit Earned tokens
-            wallet.updateBalance(
+            wallet.exchangeUpdateBalance(
                 order.tokenB,
                 order.user,
                 (_rate.mul(_amount)).div(decimals),
@@ -436,8 +478,14 @@ contract Exchange is Ownable {
                 order.tokenB,
                 fees
             );
+            wallet.exchangeUpdateBalance(
+                order.tokenA,
+                wallet.fundWallet(),
+                amountTokensToDeduct,
+                true
+            );
             //Credit Earned tokens after minusing fees
-            wallet.updateBalance(
+            wallet.exchangeUpdateBalance(
                 order.tokenB,
                 order.user,
                 (_rate.mul(_amount)).div(decimals).sub(amountTokensToDeduct),
@@ -445,11 +493,16 @@ contract Exchange is Ownable {
             );
         }
 
-        wallet.updateLockedFunds(order.user, order.tokenA, _amount, false);
+        wallet.exchangeUpdateLockedFunds(
+            order.user,
+            order.tokenA,
+            _amount,
+            false
+        );
         //seller update
-        wallet.updateBalance(order.tokenA, order.user, _amount, false);
+        wallet.exchangeUpdateBalance(order.tokenA, order.user, _amount, false);
 
-         s_filledOrders[order.user][1].push(
+        s_filledOrders[order.user][1].push(
             _filledOrder(
                 order.id,
                 order.side,
@@ -472,7 +525,12 @@ contract Exchange is Ownable {
         address _tokenB,
         uint256 _id,
         Side side
-    ) internal validOrder(_id, side, _tokenA, _tokenB) validToken(_tokenA) validToken(_tokenB){
+    )
+        internal
+        validOrder(_id, side, _tokenA, _tokenB)
+        validToken(_tokenA)
+        validToken(_tokenB)
+    {
         uint256 saleTokenAmt;
 
         if (side == Side.BUY) {
@@ -490,7 +548,6 @@ contract Exchange is Ownable {
                 if (
                     _sellOrder[i].rate <= buyOrderToFill.rate &&
                     buyOrderToFill.user != _sellOrder[i].user
-                    
                 ) {
                     _Order memory sellOrder = _sellOrder[i];
                     //if buyer's amount to buy > seller's amount to sell
@@ -522,7 +579,13 @@ contract Exchange is Ownable {
                         saleTokenAmt
                     );
                     fillOrder(Side.BUY, _id, _tokenA, _tokenB, fillOrderValues);
-                    fillOrder(Side.SELL, sellOrder.id, _tokenA, _tokenB, fillOrderValues);
+                    fillOrder(
+                        Side.SELL,
+                        sellOrder.id,
+                        _tokenA,
+                        _tokenB,
+                        fillOrderValues
+                    );
                 }
 
                 bool orderExist = orderExists(_id, side, _tokenA, _tokenB);
@@ -571,8 +634,20 @@ contract Exchange is Ownable {
                         order.rate,
                         saleTokenAmt
                     );
-                    fillOrder(Side.SELL, _id, _tokenA, _tokenB, fillOrderValues);
-                    fillOrder(Side.BUY, order.id, _tokenA, _tokenB, fillOrderValues);
+                    fillOrder(
+                        Side.SELL,
+                        _id,
+                        _tokenA,
+                        _tokenB,
+                        fillOrderValues
+                    );
+                    fillOrder(
+                        Side.BUY,
+                        order.id,
+                        _tokenA,
+                        _tokenB,
+                        fillOrderValues
+                    );
                 }
                 bool orderExist = orderExists(_id, side, _tokenA, _tokenB);
                 if (!orderExist) break;
@@ -593,17 +668,11 @@ contract Exchange is Ownable {
         address _tokenB,
         uint256 index,
         Side side
-    )
-        public
-        view
-        returns (
-            _Order memory
-        )
-    {
-        _Order memory order = s_orderBook[_tokenA][_tokenB][uint256(side)][index];
-        return (
-            order
-        );
+    ) public view returns (_Order memory) {
+        _Order memory order = s_orderBook[_tokenA][_tokenB][uint256(side)][
+            index
+        ];
+        return (order);
     }
 
     function getFilledOrderLength(
@@ -617,19 +686,11 @@ contract Exchange is Ownable {
         address _user,
         Side side,
         uint256 index
-    )
-        public
-        view
-        returns (
-            _filledOrder memory
-        )
-    {
+    ) public view returns (_filledOrder memory) {
         _filledOrder memory filledOrder = s_filledOrders[_user][uint256(side)][
             index
         ];
-        return (
-            filledOrder
-        );
+        return (filledOrder);
     }
 
     function getOrderFromArray(

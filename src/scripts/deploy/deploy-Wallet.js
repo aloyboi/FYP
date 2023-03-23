@@ -10,9 +10,6 @@ async function main() {
     const wallet = await ethers.getContractFactory("Wallet");
     console.log("Deploying Wallet contract...");
 
-    const chainId = network.config.chainId;
-    const usdcAddress = networkConfig[chainId]["USDC"];
-
     const Wallet = await wallet.deploy();
     await Wallet.deployed();
     console.log(`Deployed contract to: ${Wallet.address}`);

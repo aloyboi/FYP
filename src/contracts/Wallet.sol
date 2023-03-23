@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.0;
 
-import "./interface/IERC20.sol";
+import "./ERC20.sol";
 import "./Exchange.sol";
 
 /// @notice Library SafeMath used to prevent overflows and underflows
@@ -13,7 +13,10 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract Wallet is Ownable {
     using SafeMath for uint256; //for prevention of integer overflow
 
-    address public immutable Owner;
+    address Owner;
+    address public fundWallet;
+    uint256 decimals = 18;
+    address public aDAI;
 
     //For prevention of reentrancy
     bool private locked;
@@ -61,9 +64,9 @@ contract Wallet is Ownable {
         require(!locked, "Reentrant call detected!");
         locked = true;
         updateBalance(ethToken, msg.sender, _amount, false);
-        locked = false;
         (bool success, ) = msg.sender.call{value: _amount}("");
         require(success, "failed to send amount");
+        locked = false;
 
         emit Withdraw(
             ethToken,
@@ -80,9 +83,9 @@ contract Wallet is Ownable {
         uint256 _amount,
         uint256 _decimals
     ) external {
-        require(_token != ethToken);
+        require(_token != ethToken, "Invalid Token Type");
         require(
-            exchange.isVerifiedToken(_token),
+            exchange.isVerifiedToken(_token) || _token == aDAI,
             "Token not verified on Exchange"
         );
         //need to add a check to prove that it is an ERC20 token
@@ -93,16 +96,13 @@ contract Wallet is Ownable {
             token.transferFrom(msg.sender, address(this), _amount),
             "No Approval yet"
         );
-        uint256 decimals = 18;
-        if (_decimals == 18) {
-            updateBalance(_token, msg.sender, _amount, true);
-        } else
-            updateBalance(
-                _token,
-                msg.sender,
-                _amount.mul(10 ** decimals.sub(_decimals)),
-                true
-            );
+
+        updateBalance(
+            _token,
+            msg.sender,
+            _amount.mul(10 ** decimals.sub(_decimals)),
+            true
+        );
 
         emit Deposit(
             _token,
@@ -133,24 +133,18 @@ contract Wallet is Ownable {
         locked = true;
 
         token = IERC20(_token);
-        uint256 decimals = 18;
-        if (_decimals == 18) {
-            updateBalance(_token, msg.sender, _amount, false);
-            require(token.transfer(msg.sender, _amount));
-        } else {
-            updateBalance(
-                _token,
+        updateBalance(
+            _token,
+            msg.sender,
+            _amount.mul(10 ** decimals.sub(_decimals)),
+            false
+        );
+        require(
+            token.transfer(
                 msg.sender,
-                _amount.mul(10 ** decimals.sub(_decimals)),
-                false
-            );
-            require(
-                token.transfer(
-                    msg.sender,
-                    _amount.div(10 ** decimals.sub(_decimals))
-                )
-            );
-        }
+                _amount.div(10 ** decimals.sub(_decimals))
+            )
+        );
 
         locked = false;
         emit Withdraw(
@@ -168,12 +162,21 @@ contract Wallet is Ownable {
         return lockedFunds[_user][_token];
     }
 
+    function exchangeUpdateLockedFunds(
+        address _user,
+        address _token,
+        uint256 _amount,
+        bool isAdd
+    ) external isExchange {
+        updateLockedFunds(_user, _token, _amount, isAdd);
+    }
+
     function updateLockedFunds(
         address _user,
         address _token,
         uint256 _amount,
         bool isAdd
-    ) public isAuthorised {
+    ) internal {
         if (isAdd) {
             lockedFunds[_user][_token] = lockedFunds[_user][_token].add(
                 _amount
@@ -193,12 +196,21 @@ contract Wallet is Ownable {
         return s_tokens[_token][_user];
     }
 
+    function exchangeUpdateBalance(
+        address _token,
+        address _user,
+        uint256 _amount,
+        bool isAdd
+    ) external isExchange {
+        updateBalance(_token, _user, _amount, isAdd);
+    }
+
     function updateBalance(
         address _token,
         address _user,
         uint256 _amount,
         bool isAdd
-    ) public isAuthorised {
+    ) internal {
         if (isAdd) {
             s_tokens[_token][_user] = s_tokens[_token][_user].add(_amount);
         } else if (!isAdd) {
@@ -206,15 +218,37 @@ contract Wallet is Ownable {
         }
     }
 
+    function updateFundWallet(address _fundwallet) public onlyOwner {
+        fundWallet = _fundwallet;
+    }
+
+    function withdrawToFundWallet(address _token, uint256 _decimals) external {
+        //Only allow fundWallet address to make the call
+        require(
+            msg.sender == fundWallet,
+            "Invalid FundWallet address to withdraw"
+        );
+        uint256 totalAmount = s_tokens[_token][fundWallet];
+        uint256 actualAmount = totalAmount.div(10 ** decimals.sub(_decimals));
+        token = IERC20(_token);
+
+        require(!locked, "Reentrant call detected!");
+        locked = true;
+        updateBalance(_token, fundWallet, totalAmount, false);
+        require(token.transfer(fundWallet, actualAmount));
+        locked = false;
+    }
+
     function updateExchangeAddress(address _exchangeAddress) public onlyOwner {
         exchange = Exchange(_exchangeAddress);
     }
 
-    modifier isAuthorised() {
-        require(
-            msg.sender == address(this) || msg.sender == address(exchange),
-            "Unauthorised Function Call"
-        );
+    function updateaDaiAddress(address _address) public onlyOwner {
+        aDAI = address(_address);
+    }
+
+    modifier isExchange() {
+        require(msg.sender == address(exchange), "Not Exchange contract");
         _;
     }
 }

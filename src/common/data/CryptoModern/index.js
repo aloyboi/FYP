@@ -87,27 +87,43 @@ export const Faq = [
     {
         id: 1,
         expend: true,
-        title: "How to contact with Customer Service?",
+        title: "What is lenDEXchange DApp?",
+
         description:
-            "Our Customer Experience Team is available 7 days a week and we offer 2 ways to get in contact.Email and Chat . We try to reply quickly, so you need not to wait too long for a response!. ",
+            "lendDEXchange is an integrated Yield Farming & Decentralized Exchange platform for users to earn interests while utilising the exchange for trading",
     },
     {
         id: 2,
-        title: "App installation failed, how to update system information?",
+        expend: true,
+        title: "Decentralized Exchange",
         description:
-            "Please read the documentation carefully . We also have some online  video tutorials regarding this issue . If the problem remains, Please Open a ticket in the support forum . ",
+            "lendDEXchange's Decentralized Exchange allows users to make limit orders for supported ERC20 tokens based on a traditional order book system automated by our smart contract. A platform fee of 0.1% applies per order made",
     },
     {
         id: 3,
-        title: "Website reponse taking time, how to improve?",
+        expend: true,
+        title: "Lending Platform",
         description:
-            "At first, Please check your internet connection . We also have some online  video tutorials regarding this issue . If the problem remains, Please Open a ticket in the support forum .",
+            "lendDEXchange's Lending Platform allows users to tap on Aave protocol's liquidity reserve to earn interests from their DAI liquidity pool.  Users earn aDAI interest bearing tokens when they deposit into the pool. These tokens can be used to waive fees in the Decentralized Exchange",
     },
     {
         id: 4,
-        title: "New update fixed all bug and issues?",
+        title: "Are there fees for the DEX?",
         description:
-            "We are giving the update of this theme continuously . You will receive an email Notification when we push an update. Always try to be updated with us .",
+            "Yes, a platform fee of 0.1% applies to every order that is made. Users can select the Waiver Fee option when making limit orders to waive off fees using interest tokens earned from the Lending Platform",
+    },
+    {
+        id: 5,
+        title: "How are fees calculated?",
+        description:
+            "Fees are calculated based on the value of the trade carried out. (Limit order rate x Limit order amount x 0.1%). ",
+    },
+    {
+        id: 6,
+        title: "aDAI Tokens",
+        description:
+            "If Users selected the option to waiver fees, the fees will be deducted from the balance aDAI deposited in the exchange. " +
+            " In the event Users do not select the Waiver Fee option/Users have insufficient aDAI deposited to pay the fees, the fees will be deducted from the order amount that they are initially receiving directly",
     },
 ];
 

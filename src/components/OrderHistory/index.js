@@ -24,6 +24,9 @@ export default function StickyHeadTable(props) {
     const globalSellOrders = useSelector(
         (state) => state.orders.rows_sell_globalOrders
     );
+    const refToken = useSelector((state) => state.token.curr_ref_token);
+    const againstToken = useSelector((state) => state.token.curr_against_token);
+    const allToken = useSelector((state) => state.token.all_tokens);
 
     const handleChangePage = (event, newPage) => {
         setPage(newPage);
@@ -33,20 +36,26 @@ export default function StickyHeadTable(props) {
         setPage(0);
     };
     const columns = [
-        { id: "sizes", label: "Amount", minWidth: 130 },
         {
-            id: "prices",
-            label: "Price ($)",
-            minWidth: 130,
-            align: "right",
-            format: (value) => value.toLocaleString("en-US"),
+            id: "amountA",
+            label: props.type === 0 ? "Buy Amount " : "Sell Amount",
+            minWidth: 300,
+            align: "center",
+            format: (value) => value.toString(),
         },
         {
-            id: "rates",
-            label: "Total Value",
-            minWidth: 130,
-            align: "right",
-            format: (value) => value.toLocaleString("en-US"),
+            id: "rate",
+            label: "Rate",
+            minWidth: 300,
+            align: "center",
+            format: (value) => value.toString(),
+        },
+        {
+            id: "amountB",
+            label: props.type === 0 ? "Sell Amount " : "Buy Amount",
+            minWidth: 300,
+            align: "center",
+            format: (value) => value.toString(),
         },
     ];
 
@@ -101,7 +110,7 @@ export default function StickyHeadTable(props) {
     //         : generateRows(arrMyOrders, props.type);
     //     // eslint-disable-next-line
     // }, [globalOrders]);
-    if (props.type === 0) {
+    if (props.type === 0 && refToken != null && againstToken != null) {
         return (
             <div>
                 <TableContainer sx={{ maxHeight: 440, zIndex: "0" }}>
@@ -186,7 +195,7 @@ export default function StickyHeadTable(props) {
                 />
             </div>
         );
-    } else if (props.type === 1) {
+    } else if (props.type === 1 && refToken != null && againstToken != null) {
         return (
             <div>
                 <TableContainer sx={{ maxHeight: 440, zIndex: "0" }}>
@@ -217,12 +226,7 @@ export default function StickyHeadTable(props) {
                                           page * rowsPerPage + rowsPerPage
                                       )
                                       .map((rows) => {
-                                          console.log(
-                                              rows,
-                                              "finally",
-                                              props.orderType,
-                                              props.type
-                                          );
+                                          console.log(rows, "finally");
                                           return (
                                               <TableRow
                                                   hover

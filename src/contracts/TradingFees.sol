@@ -23,7 +23,7 @@ contract TradingFees is Ownable {
     address public daiToken =
         address(0xBa8DCeD3512925e52FE67b1b5329187589072A55); //based on Aave contract
     address public aDAI = address(0xADD98B0342e4094Ec32f3b67Ccfd3242C876ff7a); //based on Aave contract
-    PriceChecker priceFeed;
+    PriceChecker private priceFeed;
     Wallet wallet;
 
     constructor(address _priceCheckerAddress) {

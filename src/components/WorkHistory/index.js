@@ -29,8 +29,9 @@ import {
     SET_USER_FILLED_ORDERS,
     SET_USER_SELL_ORDERS,
     SET_IS_ANY_ORDER_CANCELLED,
-    SET_GLOBAL_ORDERS,
     SET_MY_ORDER_TYPE_SELECTED,
+    SET_ROWS_BUY_GLOBALORDER,
+    SET_ROWS_SELL_GLOBALORDER,
 } from "../../redux/redux-actions/actions";
 
 const WorkHistory = ({ row, col, cardStyle }) => {
@@ -48,10 +49,6 @@ const WorkHistory = ({ row, col, cardStyle }) => {
 
     const handleChange = (event, newValue) => {
         setValue(newValue);
-        dispatch({
-            type: SET_MY_OR_GLOBAL,
-            payload: newValue,
-        });
     };
 
     const handleChangeType = (event) => {
@@ -63,7 +60,9 @@ const WorkHistory = ({ row, col, cardStyle }) => {
     };
 
     async function getGlobalOrders() {
-        if (refToken == undefined || againstToken == undefined) return 0;
+        if (refToken == undefined || againstToken == undefined) {
+            return 0;
+        }
 
         await getOrderBookByTokenPairs(
             allTokens[refToken].address,
@@ -104,9 +103,13 @@ const WorkHistory = ({ row, col, cardStyle }) => {
     async function getOrders() {
         if (allTokens) {
             let tokenAddresses = await getTokenList();
+            console.log("token addresses: " + tokenAddresses);
             let buy = await getAllUserBuyOrders(tokenAddresses);
             let sell = await getAllUserSellOrders(tokenAddresses);
             let filled = await getAllUserFilledOrders(tokenAddresses);
+            console.log("Buy: " + buy);
+            console.log("Sell: " + sell);
+            console.log("Filled: " + filled);
 
             let userBuyOrders = [];
             let userSellOrders = [];
@@ -194,7 +197,7 @@ const WorkHistory = ({ row, col, cardStyle }) => {
         getGlobalOrders();
 
         // eslint-disable-next-line
-    }, [allTokens, curr, cancel, refToken, count]);
+    }, [allTokens, curr, cancel, refToken, againstToken, count]);
     return (
         <WorkHistoryWrapper id="workHistorySection">
             <Container>
@@ -208,6 +211,29 @@ const WorkHistory = ({ row, col, cardStyle }) => {
                                     color: "white",
                                 }}
                             >
+                                {value === "1" && curr != null ? (
+                                    <Select
+                                        id="demo-simple-select"
+                                        value={selectOrderType}
+                                        onChange={handleChangeType}
+                                        sx={{
+                                            width: "150px",
+                                            color: "white",
+                                            position: "fixed",
+                                            marginLeft: "400px",
+                                        }}
+                                    >
+                                        <MenuItem value={0}>
+                                            Buy Orders
+                                        </MenuItem>
+                                        <MenuItem value={1}>
+                                            Sell Orders
+                                        </MenuItem>
+                                        <MenuItem value={2}>
+                                            FIlled Orders
+                                        </MenuItem>
+                                    </Select>
+                                ) : null}
                                 <TabList centered onChange={handleChange}>
                                     <Tab
                                         sx={{
@@ -227,49 +253,36 @@ const WorkHistory = ({ row, col, cardStyle }) => {
                                     ) : null}
                                 </TabList>
                             </Box>
+
                             <TabPanel value="0">
-                                <Typography
-                                    sx={{
-                                        display: "flex",
-                                        justifyContent: "center",
-                                    }}
-                                >
-                                    Buy Order
-                                </Typography>
+                                {refToken != null && againstToken != null ? (
+                                    <Typography
+                                        sx={{
+                                            display: "flex",
+                                            justifyContent: "center",
+                                        }}
+                                    >
+                                        Global Buy Order Book
+                                    </Typography>
+                                ) : null}
                                 <OrderHistory type={0} />
-                                <Typography
-                                    sx={{
-                                        display: "flex",
-                                        justifyContent: "center",
-                                    }}
-                                >
-                                    Sell Order
-                                </Typography>
+                                {refToken != null && againstToken != null ? (
+                                    <Typography
+                                        sx={{
+                                            display: "flex",
+                                            justifyContent: "center",
+                                        }}
+                                    >
+                                        Global Sell Order Book
+                                    </Typography>
+                                ) : null}
+
                                 <OrderHistory type={1} />
                             </TabPanel>
                             <TabPanel value="1">
                                 <MyOrderHistory></MyOrderHistory>
                             </TabPanel>
                         </TabContext>
-                        {value === "1" && curr ? (
-                            <Select
-                                labelId="demo-simple-select-label"
-                                id="demo-simple-select"
-                                value={selectOrderType}
-                                onChange={handleChangeType}
-                                sx={{
-                                    width: "150px",
-                                    color: "white",
-                                    position: "fixed",
-                                    marginLeft: "900px",
-                                    marginTop: "-250px",
-                                }}
-                            >
-                                <MenuItem value={0}>Buy Orders</MenuItem>
-                                <MenuItem value={1}>Sell Orders</MenuItem>
-                                <MenuItem value={2}>FIlled Orders</MenuItem>
-                            </Select>
-                        ) : null}
                     </Card>
                 </CounterUpArea>
             </Container>

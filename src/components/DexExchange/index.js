@@ -34,6 +34,7 @@ import {
     SET_ALL_TOKENS,
     LOG_MESSAGE,
     IS_MESSAGE_DISPLAY,
+    INC_ORDER_COUNT,
 } from "../../redux/redux-actions/actions";
 
 import {
@@ -76,8 +77,9 @@ const DexExchange = () => {
     const [sellBalance, setSellBalance] = useState(0);
     const dispatch = useDispatch();
 
-    const [open, setOpen] = React.useState(false);
-    const [newTokenAddress, setNewTokenAddress] = React.useState("");
+    const [open, setOpen] = useState(false);
+    const [newTokenAddress, setNewTokenAddress] = useState("");
+    const [newTokenDecimal, setNewTokenDecimal] = useState("18");
     const adminAcc = process.env.REACT_APP_ADMIN_ADDRESS;
 
     function toFixed(num, fixed) {
@@ -92,7 +94,9 @@ const DexExchange = () => {
             type: SET_CURR_REF_TOKEN,
             payload: event.target.value, //index of all_tokens, have to  verify what event.target.value returns
         });
-        getRefTokenBalance(event.target.value);
+        if (curr != null) {
+            getRefTokenBalance(event.target.value);
+        }
         setRefTokenPrice(calculatePrice(allTokens[event.target.value].address));
     };
 
@@ -218,6 +222,7 @@ const DexExchange = () => {
             setRefTokenAmount(number);
             if (rate != 0) {
                 setAgainstTokenAmount(number * rate);
+                validateAgainstTokenAmount(number * rate);
             } else if (againstTokenAmount != 0 && rate == 0) {
                 setRate(againstTokenAmount / number);
             }
@@ -241,6 +246,7 @@ const DexExchange = () => {
             setRefTokenAmount(number);
             if (rate != 0) {
                 setAgainstTokenAmount(number * rate);
+                validateAgainstTokenAmount(number * rate);
             } else if (againstTokenAmount != 0 && rate == 0) {
                 setRate(againstTokenAmount / number);
             }
@@ -256,6 +262,7 @@ const DexExchange = () => {
                 setRefTokenAmount(number);
                 if (rate != 0) {
                     setAgainstTokenAmount(number * rate);
+                    validateAgainstTokenAmount(number * rate);
                 } else if (againstTokenAmount != 0 && rate == 0) {
                     setRate(againstTokenAmount / number);
                 }
@@ -271,6 +278,7 @@ const DexExchange = () => {
                 setRefTokenAmount(number);
                 if (rate != 0) {
                     setAgainstTokenAmount(number * rate);
+                    validateAgainstTokenAmount(number * rate);
                 } else if (againstTokenAmount != 0 && rate == 0) {
                     setRate(againstTokenAmount / number);
                 }
@@ -284,6 +292,7 @@ const DexExchange = () => {
                 setRefTokenAmount(number);
                 if (rate != 0) {
                     setAgainstTokenAmount(number * rate);
+                    validateAgainstTokenAmount(number * rate);
                 } else if (againstTokenAmount != 0 && rate == 0) {
                     setRate(againstTokenAmount / number);
                 }
@@ -300,6 +309,7 @@ const DexExchange = () => {
                 setRefTokenAmount(number);
                 if (rate != 0) {
                     setAgainstTokenAmount(number * rate);
+                    validateAgainstTokenAmount(number * rate);
                 } else if (againstTokenAmount != 0 && rate == 0) {
                     setRate(againstTokenAmount / number);
                 }
@@ -353,6 +363,7 @@ const DexExchange = () => {
             setAgainstTextFieldError(false);
             setAgainstTextFieldHtext("");
             setAgainstTokenAmount(number);
+
             if (refTokenAmount != 0) {
                 setRate(number / refTokenAmount);
             } else if (refTokenAmount == 0 && rate != 0) {
@@ -395,6 +406,7 @@ const DexExchange = () => {
                     setRate(number / refTokenAmount);
                 } else if (refTokenAmount == 0 && rate != 0) {
                     setRefTokenAmount(number / rate);
+                    validateRefTokenAmount(number / rate);
                 }
                 return;
             } else {
@@ -410,6 +422,7 @@ const DexExchange = () => {
                     setRate(number / refTokenAmount);
                 } else if (refTokenAmount == 0 && rate != 0) {
                     setRefTokenAmount(number / rate);
+                    validateRefTokenAmount(number / rate);
                 }
                 return;
             }
@@ -423,6 +436,7 @@ const DexExchange = () => {
                     setRate(number / refTokenAmount);
                 } else if (refTokenAmount == 0 && rate != 0) {
                     setRefTokenAmount(number / rate);
+                    validateRefTokenAmount(number / rate);
                 }
             }
             //else reduce number to 6 decimal places
@@ -439,6 +453,7 @@ const DexExchange = () => {
                     setRate(number / refTokenAmount);
                 } else if (refTokenAmount == 0 && rate != 0) {
                     setRefTokenAmount(number / rate);
+                    validateRefTokenAmount(number / rate);
                 }
             }
         }
@@ -456,9 +471,13 @@ const DexExchange = () => {
         setNewTokenAddress(e.target.value);
     };
 
+    const handleNewTokenDecimal = (e) => {
+        setNewTokenDecimal(e.target.value);
+    };
+
     const handleFinalAddToken = async () => {
         console.log(newTokenAddress);
-        await addToken(newTokenAddress, (e) => {
+        await addToken(newTokenAddress, newTokenDecimal, (e) => {
             console.log(e);
         });
         setOpen(false);
@@ -519,22 +538,14 @@ const DexExchange = () => {
             setRate(number);
             if (refTokenAmount != 0) {
                 setAgainstTokenAmount(number * refTokenAmount);
+                validateAgainstTokenAmount(number * refTokenAmount);
             } else if (refTokenAmount == 0 && againstTokenAmount != 0) {
                 setRefTokenAmount(againstTokenAmount / number);
+                validateRefTokenAmount(againstTokenAmount / number);
             }
             return;
         }
-        // if (lastChar === "0") {
-        //     setRateTextFieldError(false);
-        //     setRateTextFieldHtext("");
-        //     setRate(number);
-        //     if (refTokenAmount != 0) {
-        //         setAgainstTokenAmount(number * refTokenAmount);
-        //     } else if (refTokenAmount == 0 && againstTokenAmount != 0) {
-        //         setRefTokenAmount(againstTokenAmount / number);
-        //     }
-        //     return;
-        // }
+
         if (firstChar === "0" && secondChar !== ".") {
             setRateTextFieldError(false);
             setRateTextFieldHtext("");
@@ -548,13 +559,36 @@ const DexExchange = () => {
             return;
         }
 
-        setRateTextFieldHtext("");
-        setRateTextFieldError(false);
-        setRate(number);
-        if (refTokenAmount != 0) {
-            setAgainstTokenAmount(number * refTokenAmount);
-        } else if (refTokenAmount == 0 && againstTokenAmount != 0) {
-            setRefTokenAmount(againstTokenAmount / number);
+        let regex = /^(?!0\d|$)\d*(\.\d{0,18})?$/;
+        if (regex.test(number)) {
+            setRateTextFieldHtext("");
+            setRateTextFieldError(false);
+            setRate(number);
+            if (refTokenAmount != 0) {
+                setAgainstTokenAmount(number * refTokenAmount);
+                validateAgainstTokenAmount(number * refTokenAmount);
+            } else if (refTokenAmount == 0 && againstTokenAmount != 0) {
+                setRefTokenAmount(againstTokenAmount / number);
+                validateRefTokenAmount(againstTokenAmount / number);
+            }
+            return;
+        } else {
+            setRateTextFieldError(true);
+            setRateTextFieldHtext("Up to 18 decimal places");
+            setTimeout(() => {
+                setRateTextFieldError(false);
+                setRateTextFieldHtext("");
+            }, 2000);
+            number = toFixed(number, 18);
+            setRate(number);
+            if (refTokenAmount != 0) {
+                setAgainstTokenAmount(number * refTokenAmount);
+                validateAgainstTokenAmount(number * refTokenAmount);
+            } else if (refTokenAmount == 0 && againstTokenAmount != 0) {
+                setRefTokenAmount(againstTokenAmount / number);
+                validateRefTokenAmount(againstTokenAmount / number);
+            }
+            return;
         }
     };
 
@@ -567,26 +601,32 @@ const DexExchange = () => {
         if (buySellSelected === 0) {
             createLimitSellOrder(
                 allTokens[refTokenSelected].address,
-                ethers.utils.parseEther(refTokenAmount).toString(),
+                ethers.utils.parseEther(refTokenAmount.toString()).toString(),
                 allTokens[againstTokenSelected].address,
-                ethers.utils.parseEther(againstTokenAmount).toString(),
-                ethers.utils.parseEther(rate).toString(),
+                ethers.utils
+                    .parseEther(againstTokenAmount.toString())
+                    .toString(),
+                ethers.utils.parseEther(rate.toString()).toString(),
                 waiveFees,
                 (e) => {
                     displayTempMessage(e);
+                    dispatch({ type: INC_ORDER_COUNT });
                 },
                 (e) => {
                     displayTempMessage(e);
+                    dispatch({ type: INC_ORDER_COUNT });
                 },
                 displayTempMessage
             );
         } else {
             createLimitBuyOrder(
                 allTokens[refTokenSelected].address,
-                ethers.utils.parseEther(refTokenAmount).toString(),
+                ethers.utils.parseEther(refTokenAmount.toString()).toString(),
                 allTokens[againstTokenSelected].address,
-                ethers.utils.parseEther(againstTokenAmount).toString(),
-                ethers.utils.parseEther(rate).toString(),
+                ethers.utils
+                    .parseEther(againstTokenAmount.toString())
+                    .toString(),
+                ethers.utils.parseEther(rate.toString()).toString(),
                 waiveFees,
                 (e) => {
                     displayTempMessage(e);
@@ -611,6 +651,8 @@ const DexExchange = () => {
     useEffect(() => {
         //should only be called on initiation
         dispatch({ type: SET_ALL_TOKENS, payload: data.tokens });
+        dispatch({ type: SET_CURR_REF_TOKEN, payload: null });
+        dispatch({ type: SET_CURR_AGAINST_TOKEN, payload: null });
         // eslint-disable-next-line
     }, []);
 
@@ -620,6 +662,10 @@ const DexExchange = () => {
             againstTokenSelected != null &&
             refTokenSelected != againstTokenSelected
         ) {
+            if (curr != null) {
+                getRefTokenBalance(refTokenSelected);
+                getAgainstTokenBalance(againstTokenSelected);
+            }
             calculatePairPrice();
         }
 
@@ -628,7 +674,7 @@ const DexExchange = () => {
             console.log("This will run every minute!");
         }, 60000);
         return () => clearInterval(interval);
-    }, [refTokenSelected, againstTokenSelected]);
+    }, [refTokenSelected, againstTokenSelected, curr]);
 
     return (
         <DexExchangeContainer id="workHistorySection">
@@ -653,8 +699,8 @@ const DexExchange = () => {
                     onChange={handleBuySellSelectedChange}
                     sx={{ height: "40px" }}
                 >
-                    <Tab label="Sell" value={0} />
-                    <Tab label="Buy" value={1} />
+                    <Tab label="Sell" value={0} sx={{ color: "grey" }} />
+                    <Tab label="Buy" value={1} sx={{ color: "grey" }} />
                     {curr ? (
                         curr.toLowerCase() === adminAcc.toLowerCase() ? (
                             <Tooltip title="Click Here to Add Tokens">
@@ -1064,7 +1110,8 @@ const DexExchange = () => {
 
                     {refTokenSelected != againstTokenSelected &&
                     refTokenSelected != null &&
-                    againstTokenSelected != null ? (
+                    againstTokenSelected != null &&
+                    curr != null ? (
                         <Button
                             className="click-button"
                             style={{
@@ -1114,6 +1161,18 @@ const DexExchange = () => {
                         }}
                         value={newTokenAddress}
                         onChange={handleNewTokenInputChange}
+                    ></TextField>
+                    <TextField
+                        label="Decimals"
+                        variant="filled"
+                        sx={{
+                            marginLeft: "100px",
+                            marginRight: "100px",
+                            marginTop: "25px",
+                            color: "000 !important",
+                        }}
+                        value={newTokenDecimal}
+                        onChange={handleNewTokenDecimal}
                     >
                         test
                     </TextField>
