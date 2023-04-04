@@ -1,13 +1,16 @@
 import { ethers } from "ethers";
 import Wallet from "../artifacts/contracts/Wallet.sol/Wallet.json";
 import Exchange from "../artifacts/contracts/Exchange.sol/Exchange.json";
+import AMM from "../artifacts/contracts/AMM.sol/AMM.json";
 import PriceChecker from "../artifacts/contracts/PriceChecker.sol/PriceChecker.json";
 import TradingFees from "../artifacts/contracts/TradingFees.sol/TradingFees.json";
 import ERC20 from "../artifacts/contracts/ERC20.sol/ERC20.json";
+import { order } from "styled-system";
 
 const walletAddress = process.env.REACT_APP_WALLET_ADDRESS;
 const exchangeAddress = process.env.REACT_APP_EXCHANGE_ADDRESS;
 const priceCheckerAddress = process.env.REACT_APP_PRICECHECKER_ADDRESS;
+const ammAddress = process.env.REACT_APP_AMM_ADDRESS;
 const decimals = 18;
 
 export async function depositETH(_amount, callback, errorCallback) {
@@ -240,7 +243,7 @@ export async function createLimitBuyOrder(
     _amountB,
     _rate,
     waiveFees,
-    callbackOrderCreated,
+    // callbackOrderCreated,
     callbackOrderFilled,
     errorCallback
 ) {
@@ -259,30 +262,29 @@ export async function createLimitBuyOrder(
             waiveFees
         );
         await transaction.wait();
-        if (typeof callbackOrderCreated == "function") {
-            callbackOrderCreated(
-                `Order placed, order id:${orderId.toString()}`
-            );
-        }
-        const fillOrder = await exchange.matchOrders(
-            _tokenA,
-            _tokenB,
-            orderId,
-            "0"
-        );
-        await fillOrder.wait();
+        // if (typeof callbackOrderCreated == "function") {
+        //     callbackOrderCreated(
+        //         `Order placed, order id:${orderId.toString()}`
+        //     );
+        // }
+        const fillOrder = await matchBuyOrders(_tokenA, _tokenB, orderId);
+
         if (typeof callbackOrderFilled == "function") {
             callbackOrderFilled("We will attempt to fill your order");
         }
     } catch (error) {
-        console.log(error);
+        console.log("Error: " + error);
         if (typeof errorCallback == "function") {
-            if (error.message.includes("Insufficient Buyer Token Balance")) {
-                errorCallback("Insufficient Buyer Token Balance");
+            if (error.message.includes("Insufficient Seller Token Balance")) {
+                errorCallback("Insufficient Seller Token Balance");
+            } else if (
+                error.message.includes("Insufficient Buyer Token Balance")
+            ) {
+                errorCallback("Insufficient Buyer Balance");
             } else if (error.message.includes("user rejected transaction")) {
                 errorCallback("Transaction Rejected");
             } else {
-                errorCallback("An Error Occured");
+                console.log(error);
             }
         }
     }
@@ -319,27 +321,199 @@ export async function createLimitSellOrder(
                 `Order placed, order id:${orderId.toString()}`
             );
         }
-        const fillOrder = await exchange.matchOrders(
-            _tokenA,
-            _tokenB,
-            orderId,
-            "1"
-        );
-        await fillOrder.wait();
+        const fillOrder = await matchSellOrders(_tokenA, _tokenB, orderId);
+
         if (typeof callbackOrderFilled == "function") {
             callbackOrderFilled("We will attempt to fill your order");
         }
     } catch (error) {
-        console.log(error);
+        console.log("Error: " + error);
         if (typeof errorCallback == "function") {
             if (error.message.includes("Insufficient Seller Token Balance")) {
-                errorCallback("Insufficient Balance");
+                errorCallback("Insufficient Seller Balance");
+            } else if (
+                error.message.includes("Insufficient Buyer Token Balance")
+            ) {
+                errorCallback("Insufficient Buyer Balance");
             } else if (error.message.includes("user rejected transaction")) {
                 errorCallback("Transaction Rejected");
             } else {
-                errorCallback("An Error Occured");
+                console.log(error);
             }
         }
+    }
+}
+
+async function matchBuyOrders(_tokenA, _tokenB, _id) {
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const signer = provider.getSigner();
+    const exchange = new ethers.Contract(exchangeAddress, Exchange.abi, signer);
+    const amm = new ethers.Contract(ammAddress, AMM.abi, signer);
+
+    let saleTokenAmt;
+    let orderstoFill = [];
+    let buy;
+    let i;
+
+    try {
+        [buy, i] = await exchange.getOrderFromArray(_tokenA, _tokenB, "0", _id);
+
+        let buyOrderToFill = [...buy];
+        buyOrderToFill[0] = ethers.BigNumber.from(buyOrderToFill[0]);
+        buyOrderToFill[1] = ethers.BigNumber.from(buyOrderToFill[1]);
+        buyOrderToFill[4] = ethers.BigNumber.from(buyOrderToFill[4]);
+        buyOrderToFill[6] = ethers.BigNumber.from(buyOrderToFill[6]);
+        buyOrderToFill[7] = ethers.BigNumber.from(buyOrderToFill[7]);
+        buyOrderToFill[8] = ethers.BigNumber.from(buyOrderToFill[8]);
+        buyOrderToFill[9] = ethers.BigNumber.from(buyOrderToFill[9]);
+
+        length = await exchange.getOrderLength("1", _tokenA, _tokenB);
+
+        //all in 18 decimals
+        for (let i = 0; i < length; i++) {
+            let order = await exchange.getOrder(_tokenA, _tokenB, i, "1");
+            let modifiedOrder = [...order];
+            modifiedOrder[0] = ethers.BigNumber.from(modifiedOrder[0]);
+            modifiedOrder[1] = ethers.BigNumber.from(modifiedOrder[1]);
+            modifiedOrder[4] = ethers.BigNumber.from(modifiedOrder[4]);
+            modifiedOrder[6] = ethers.BigNumber.from(modifiedOrder[6]);
+            modifiedOrder[7] = ethers.BigNumber.from(modifiedOrder[7]);
+            modifiedOrder[8] = ethers.BigNumber.from(modifiedOrder[8]);
+            modifiedOrder[9] = ethers.BigNumber.from(modifiedOrder[9]);
+
+            //Check Rate satisfies trade conditions and same users cannot fill their own orders
+            if (
+                modifiedOrder[7] <= sellOrderToFill[7] &&
+                modifiedOrder[2] != buyOrderToFill[2]
+            ) {
+                {
+                    buyOrderToFill[4] > modifiedOrder[4]
+                        ? (saleTokenAmt = modifiedOrder[4])
+                        : (saleTokenAmt = buyOrderToFill[4]);
+                }
+
+                let buyOrder = [_id, "0", saleTokenAmt, modifiedOrder[7]]; //orderId, side, amountFilled, rate
+                let sellOrder = [
+                    modifiedOrder[0],
+                    "1",
+                    saleTokenAmt,
+                    modifiedOrder[7],
+                ]; //orderId, side, amountFilled, rate
+
+                orderstoFill.push(buyOrder);
+                orderstoFill.push(sellOrder);
+
+                buyOrderToFill[4] = buyOrderToFill[4] - saleTokenAmt;
+
+                if (buyOrderToFill[4] == 0) break;
+            }
+        }
+        console.log("Orders to fill: " + orderstoFill);
+
+        //Convert to solidity type
+        let solidityArray = new Array(orderstoFill.length);
+        for (let i = 0; i < orderstoFill.length; i++) {
+            solidityArray[i] = new Array(orderstoFill[i].length);
+
+            for (let j = 0; j < orderstoFill[i].length; j++) {
+                solidityArray[i][j] = orderstoFill[i][j].toString();
+            }
+        }
+        const fill = await amm.fillOrder(_tokenA, _tokenB, solidityArray, {
+            gasLimit: 1000000,
+        });
+        await fill.wait();
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+async function matchSellOrders(_tokenA, _tokenB, _id) {
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const signer = provider.getSigner();
+    const exchange = new ethers.Contract(exchangeAddress, Exchange.abi, signer);
+    const amm = new ethers.Contract(ammAddress, AMM.abi, signer);
+
+    let saleTokenAmt;
+    let orderstoFill = [];
+    let sell;
+    let i;
+
+    try {
+        [sell, i] = await exchange.getOrderFromArray(
+            _tokenA,
+            _tokenB,
+            "1",
+            _id
+        );
+
+        let sellOrderToFill = [...sell];
+        sellOrderToFill[0] = ethers.BigNumber.from(sellOrderToFill[0]);
+        sellOrderToFill[1] = ethers.BigNumber.from(sellOrderToFill[1]);
+        sellOrderToFill[4] = ethers.BigNumber.from(sellOrderToFill[4]);
+        sellOrderToFill[6] = ethers.BigNumber.from(sellOrderToFill[6]);
+        sellOrderToFill[7] = ethers.BigNumber.from(sellOrderToFill[7]);
+        sellOrderToFill[8] = ethers.BigNumber.from(sellOrderToFill[8]);
+        sellOrderToFill[9] = ethers.BigNumber.from(sellOrderToFill[9]);
+
+        length = await exchange.getOrderLength("0", _tokenA, _tokenB);
+
+        //all in 18 decimals
+        for (let i = 0; i < length; i++) {
+            let order = await exchange.getOrder(_tokenA, _tokenB, i, "0");
+            let modifiedOrder = [...order];
+            modifiedOrder[0] = ethers.BigNumber.from(modifiedOrder[0]);
+            modifiedOrder[1] = ethers.BigNumber.from(modifiedOrder[1]);
+            modifiedOrder[4] = ethers.BigNumber.from(modifiedOrder[4]);
+            modifiedOrder[6] = ethers.BigNumber.from(modifiedOrder[6]);
+            modifiedOrder[7] = ethers.BigNumber.from(modifiedOrder[7]);
+            modifiedOrder[8] = ethers.BigNumber.from(modifiedOrder[8]);
+            modifiedOrder[9] = ethers.BigNumber.from(modifiedOrder[9]);
+
+            //Check Rate satisfies trade conditions and same users cannot fill their own orders
+            if (
+                modifiedOrder[7] >= sellOrderToFill[7] &&
+                modifiedOrder[2] != sellOrderToFill[2]
+            ) {
+                {
+                    sellOrderToFill[4] > modifiedOrder[4]
+                        ? (saleTokenAmt = modifiedOrder[4])
+                        : (saleTokenAmt = sellOrderToFill[4]);
+                }
+
+                let sellOrder = [_id, "1", saleTokenAmt, modifiedOrder[7]]; //orderId, side, amountFilled, rate
+                let buyOrder = [
+                    modifiedOrder[0],
+                    "0",
+                    saleTokenAmt,
+                    modifiedOrder[7],
+                ]; //orderId, side, amountFilled, rate
+
+                orderstoFill.push(sellOrder);
+                orderstoFill.push(buyOrder);
+
+                sellOrderToFill[4] = sellOrderToFill[4] - saleTokenAmt;
+
+                if (sellOrderToFill[4] == 0) break;
+            }
+        }
+        console.log("Orders to fill: " + orderstoFill);
+
+        //Convert to solidity type
+        let solidityArray = new Array(orderstoFill.length);
+        for (let i = 0; i < orderstoFill.length; i++) {
+            solidityArray[i] = new Array(orderstoFill[i].length);
+
+            for (let j = 0; j < orderstoFill[i].length; j++) {
+                solidityArray[i][j] = orderstoFill[i][j].toString();
+            }
+        }
+        const fill = await amm.fillOrder(_tokenA, _tokenB, solidityArray, {
+            gasLimit: 1000000,
+        });
+        await fill.wait();
+    } catch (error) {
+        console.log(error);
     }
 }
 
@@ -630,7 +804,7 @@ export async function cancelOrder(
             _tokenA,
             _tokenB,
             {
-                gasLimit: 250000,
+                gasLimit: 700000,
             }
         );
         await tx.wait();

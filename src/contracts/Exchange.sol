@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 
 import "./PriceChecker.sol";
 import "./TradingFees.sol";
+import "./Wallet.sol";
 
 /// @notice Library SafeMath used to prevent overflows and underflows
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
@@ -57,6 +58,8 @@ contract Exchange is Ownable {
         bool waiveFees;
     }
 
+    _Order public orderStruct;
+
     //For any order that is filled even if it is partially filled or fully filled
     struct _filledOrder {
         uint256 id;
@@ -109,18 +112,17 @@ contract Exchange is Ownable {
         bool waiveFees
     );
 
-    event fillBuyOrder(
-        _Order remainingOrder,
-        uint256 amountBought,
-        uint256 fillBuyRate,
-        bool feesWaived,
-        uint256 feesPaid
-    );
-
-    event fillSellOrder(
-        _Order remainingOrder,
-        uint256 amountSold,
-        uint256 fillSellRate,
+    event filledOrder(
+        uint256 id,
+        Side side,
+        address user,
+        address tokenA,
+        address tokenB,
+        uint256 amountFilled,
+        uint256 fillRate,
+        uint256 originalRate,
+        uint256 originalAmountA,
+        uint256 originalAmountB,
         bool feesWaived,
         uint256 feesPaid
     );
@@ -305,354 +307,60 @@ contract Exchange is Ownable {
         );
     }
 
-    function fillOrder(
-        Side side,
-        uint256 _id,
-        address _tokenA,
-        address _tokenB,
-        _fillOrderValues memory a
-    )
-        internal
-        validOrder(_id, side, _tokenA, _tokenB)
-        validToken(_tokenA)
-        validToken(_tokenB)
-    {
-        uint256 _side = uint256(side);
-        (_Order memory order, uint256 index) = getOrderFromArray(
-            _tokenA,
-            _tokenB,
-            _side,
-            _id
-        );
+    function updateFilledOrders(
+        _filledOrder memory order,
+        uint256 _side
+    ) external {
+        s_filledOrders[order.user][_side].push(order);
 
-        require(order.amountA >= a.amount, "Invalid Order Amount to fill");
-
-        order.amountA = order.amountA.sub(a.amount);
-        order.amountB = order.amountB.sub(
-            order.rate.mul(a.amount).div(decimals)
-        );
-        s_orderBook[_tokenA][_tokenB][_side][index].amountA = order.amountA;
-        s_orderBook[_tokenA][_tokenB][_side][index].amountB = order.amountB;
-
-        uint256 fees = tradingFees.calculateFees(
-            a.amount,
-            a.rate,
-            order.tokenB
-        );
-        bool feesWaived = order.waiveFees &&
-            tradingFees.checkSufficientaDAI(fees, order.user);
-
-        if (side == Side.BUY) {
-            fillBuyOrders(order, a.amount, a.rate, feesWaived, fees);
-            emit fillBuyOrder(order, a.amount, a.rate, feesWaived, fees);
-        } else if (side == Side.SELL) {
-            fillSellOrders(order, a.amount, a.rate, feesWaived, fees);
-            emit fillSellOrder(order, a.amount, a.rate, feesWaived, fees);
-        }
-
-        if (order.amountA == 0) {
-            s_isManual = false;
-            cancelOrder(side, order.id, order.tokenA, order.tokenB); //remove filled orders
-            s_isManual = true;
-        }
-    }
-
-    function fillBuyOrders(
-        _Order memory order,
-        uint256 _amount,
-        uint256 _rate,
-        bool feesWaived,
-        uint256 fees
-    ) internal {
-        if (feesWaived) {
-            //Deduct aDAI
-            uint256 aDAIToDeduct = tradingFees.amountaDAIToDeduct(fees);
-            wallet.exchangeUpdateBalance(
-                tradingFees.aDAI(),
-                order.user,
-                aDAIToDeduct,
-                false
-            );
-            wallet.exchangeUpdateBalance(
-                tradingFees.aDAI(),
-                wallet.fundWallet(),
-                aDAIToDeduct,
-                true
-            );
-
-            //Credit Bought tokens
-            wallet.exchangeUpdateBalance(
-                order.tokenA,
-                order.user,
-                _amount,
-                true
-            );
-        } else {
-            uint256 amountTokenToDeduct = tradingFees.amountTokensToDeduct(
-                order.tokenA,
-                fees
-            );
-            //Credit Bought tokens after minusing fees
-            wallet.exchangeUpdateBalance(
-                order.tokenA,
-                order.user,
-                _amount.sub(amountTokenToDeduct),
-                true
-            );
-
-            wallet.exchangeUpdateBalance(
-                order.tokenA,
-                wallet.fundWallet(),
-                amountTokenToDeduct,
-                true
-            );
-        }
-
-        //Original Locked Funds unlocked
-        wallet.exchangeUpdateLockedFunds(
-            order.user,
-            order.tokenB,
-            (order.rate.mul(_amount)).div(decimals),
-            false
-        );
-
-        //buyer update
-        //Buyer balance deducted from what he paid
-        wallet.exchangeUpdateBalance(
-            order.tokenB,
-            order.user,
-            (_rate.mul(_amount)).div(decimals),
-            false
-        );
-
-        s_filledOrders[order.user][0].push(
-            _filledOrder(
-                order.id,
-                order.side,
-                order.user,
-                order.tokenA,
-                order.tokenB,
-                _amount,
-                _rate,
-                order.rate,
-                order.originalAmountA,
-                order.originalAmountB,
-                feesWaived,
-                fees
-            )
-        );
-    }
-
-    function fillSellOrders(
-        _Order memory order,
-        uint256 _amount,
-        uint256 _rate,
-        bool feesWaived,
-        uint256 fees
-    ) internal {
-        if (feesWaived) {
-            //Deduct aDAI
-            uint256 aDAIToDeduct = tradingFees.amountaDAIToDeduct(fees);
-            wallet.exchangeUpdateBalance(
-                tradingFees.aDAI(),
-                order.user,
-                aDAIToDeduct,
-                false
-            );
-            wallet.exchangeUpdateBalance(
-                tradingFees.aDAI(),
-                wallet.fundWallet(),
-                aDAIToDeduct,
-                true
-            );
-
-            //Credit Earned tokens
-            wallet.exchangeUpdateBalance(
-                order.tokenB,
-                order.user,
-                (_rate.mul(_amount)).div(decimals),
-                true
-            );
-        } else {
-            uint256 amountTokensToDeduct = tradingFees.amountTokensToDeduct(
-                order.tokenB,
-                fees
-            );
-            wallet.exchangeUpdateBalance(
-                order.tokenA,
-                wallet.fundWallet(),
-                amountTokensToDeduct,
-                true
-            );
-            //Credit Earned tokens after minusing fees
-            wallet.exchangeUpdateBalance(
-                order.tokenB,
-                order.user,
-                (_rate.mul(_amount)).div(decimals).sub(amountTokensToDeduct),
-                true
-            );
-        }
-
-        wallet.exchangeUpdateLockedFunds(
+        emit filledOrder(
+            order.id,
+            order.side,
             order.user,
             order.tokenA,
-            _amount,
-            false
-        );
-        //seller update
-        wallet.exchangeUpdateBalance(order.tokenA, order.user, _amount, false);
-
-        s_filledOrders[order.user][1].push(
-            _filledOrder(
-                order.id,
-                order.side,
-                order.user,
-                order.tokenA,
-                order.tokenB,
-                _amount,
-                _rate,
-                order.rate,
-                order.originalAmountA,
-                order.originalAmountB,
-                feesWaived,
-                fees
-            )
+            order.tokenB,
+            order.amountFilled,
+            order.fillRate,
+            order.originalRate,
+            order.originalAmountA,
+            order.originalAmountB,
+            order.feesWaived,
+            order.feesPaid
         );
     }
 
-    function matchOrders(
-        address _tokenA,
-        address _tokenB,
-        uint256 _id,
-        Side side
-    )
-        internal
-        validOrder(_id, side, _tokenA, _tokenB)
-        validToken(_tokenA)
-        validToken(_tokenB)
-    {
-        uint256 saleTokenAmt;
+    function updateOrder(
+        _Order memory order,
+        uint256 _amountA,
+        uint256 _amountB,
+        uint256 _index
+    ) external validOrder(order.id, order.side, order.tokenA, order.tokenB) {
+        uint256 a = s_orderBook[order.tokenA][order.tokenB][uint8(order.side)][
+            _index
+        ].amountA;
+        uint256 b = s_orderBook[order.tokenA][order.tokenB][uint8(order.side)][
+            _index
+        ].amountB;
+        s_orderBook[order.tokenA][order.tokenB][uint8(order.side)][_index]
+            .amountA = _amountA;
+        s_orderBook[order.tokenA][order.tokenB][uint8(order.side)][_index]
+            .amountB = _amountB;
 
-        if (side == Side.BUY) {
-            //Retrieve sell order to match
-            _Order[] memory _sellOrder = s_orderBook[_tokenA][_tokenB][1];
-            for (uint256 i = 0; i < _sellOrder.length; i++) {
-                //Retrieve buy order to be filled
-                (_Order memory buyOrderToFill, ) = getOrderFromArray(
-                    _tokenA,
-                    _tokenB,
-                    uint8(side),
-                    _id
-                );
-                //sell order hit buyer's limit price & tokenB matches
-                if (
-                    _sellOrder[i].rate <= buyOrderToFill.rate &&
-                    buyOrderToFill.user != _sellOrder[i].user
-                ) {
-                    _Order memory sellOrder = _sellOrder[i];
-                    //if buyer's amount to buy > seller's amount to sell
-                    if (buyOrderToFill.amountA > sellOrder.amountA) {
-                        saleTokenAmt = sellOrder.amountA;
-                    }
-                    //if seller's amount to sell >= buyer's amount to buy
-                    else if (buyOrderToFill.amountA <= sellOrder.amountA) {
-                        saleTokenAmt = buyOrderToFill.amountA;
-                    }
+        require(
+            s_orderBook[order.tokenA][order.tokenB][uint8(order.side)][_index]
+                .amountA <
+                a &&
+                s_orderBook[order.tokenA][order.tokenB][uint8(order.side)][
+                    _index
+                ].amountB <
+                b,
+            "Order not updated properly"
+        );
+    }
 
-                    //Verify current balance
-                    require(
-                        wallet.balanceOf(
-                            buyOrderToFill.tokenB,
-                            buyOrderToFill.user
-                        ) >= (saleTokenAmt.mul(sellOrder.rate)).div(decimals),
-                        "Insufficient Buyer Token Balance"
-                    );
-                    require(
-                        wallet.balanceOf(_tokenA, sellOrder.user) >=
-                            saleTokenAmt,
-                        "Insufficient Seller Token Balance"
-                    );
-
-                    //update orders
-                    _fillOrderValues memory fillOrderValues = _fillOrderValues(
-                        sellOrder.rate,
-                        saleTokenAmt
-                    );
-                    fillOrder(Side.BUY, _id, _tokenA, _tokenB, fillOrderValues);
-                    fillOrder(
-                        Side.SELL,
-                        sellOrder.id,
-                        _tokenA,
-                        _tokenB,
-                        fillOrderValues
-                    );
-                }
-
-                bool orderExist = orderExists(_id, side, _tokenA, _tokenB);
-                if (!orderExist) break;
-            }
-        } else if (side == Side.SELL) {
-            //Retrieve buy order to match
-            _Order[] memory _buyOrder = s_orderBook[_tokenA][_tokenB][0];
-            for (uint256 i = 0; i < _buyOrder.length; i++) {
-                //Retrieve sell order to be filled
-                (_Order memory sellOrderToFill, ) = getOrderFromArray(
-                    _tokenA,
-                    _tokenB,
-                    1,
-                    _id
-                );
-                //sell order hit buyer's limit price
-                if (
-                    _buyOrder[i].rate >= sellOrderToFill.rate &&
-                    _buyOrder[i].user != sellOrderToFill.user
-                ) {
-                    _Order memory order = _buyOrder[i];
-
-                    //if seller's amount to sell > buyer's amount to buy
-                    if (sellOrderToFill.amountA > order.amountA) {
-                        saleTokenAmt = order.amountA;
-                    }
-                    //if buyer's amount to buy > seller's amount to sell
-                    else if (sellOrderToFill.amountA <= order.amountA) {
-                        saleTokenAmt = sellOrderToFill.amountA;
-                    }
-                    //Verify current balance
-                    require(
-                        wallet.balanceOf(_tokenA, sellOrderToFill.user) >=
-                            saleTokenAmt,
-                        "Insufficient Seller Token Balance"
-                    );
-                    require(
-                        wallet.balanceOf(order.tokenB, order.user) >=
-                            (saleTokenAmt.mul(order.rate)).div(decimals),
-                        "Insufficient Buyer Token Balance"
-                    );
-
-                    //update orders
-                    _fillOrderValues memory fillOrderValues = _fillOrderValues(
-                        order.rate,
-                        saleTokenAmt
-                    );
-                    fillOrder(
-                        Side.SELL,
-                        _id,
-                        _tokenA,
-                        _tokenB,
-                        fillOrderValues
-                    );
-                    fillOrder(
-                        Side.BUY,
-                        order.id,
-                        _tokenA,
-                        _tokenB,
-                        fillOrderValues
-                    );
-                }
-                bool orderExist = orderExists(_id, side, _tokenA, _tokenB);
-                if (!orderExist) break;
-            }
-        }
+    function setManual(bool _isManual) external {
+        s_isManual = _isManual;
+        require(s_isManual == _isManual, "Invalid s_isManual bool");
     }
 
     function getOrderLength(
@@ -687,10 +395,7 @@ contract Exchange is Ownable {
         Side side,
         uint256 index
     ) public view returns (_filledOrder memory) {
-        _filledOrder memory filledOrder = s_filledOrders[_user][uint256(side)][
-            index
-        ];
-        return (filledOrder);
+        return s_filledOrders[_user][uint256(side)][index];
     }
 
     function getOrderFromArray(
@@ -700,15 +405,12 @@ contract Exchange is Ownable {
         uint256 _id
     ) public view returns (_Order memory, uint256) {
         uint256 i = 0;
-        _Order[] memory _order = s_orderBook[_tokenA][_tokenB][side];
-        _Order memory order;
-        for (i; i < _order.length; i++) {
-            if (_order[i].id == _id) {
-                order = _order[i];
-                break;
+        for (i; i < s_orderBook[_tokenA][_tokenB][side].length; i++) {
+            if (s_orderBook[_tokenA][_tokenB][side][i].id == _id) {
+                return (s_orderBook[_tokenA][_tokenB][side][i], i);
             }
         }
-        return (order, i);
+        revert("Order not Found");
     }
 
     function orderExists(
@@ -747,6 +449,7 @@ contract Exchange is Ownable {
                 return tokenList[i].decimals;
             }
         }
+        revert("Token not available");
     }
 
     function setWalletAddress(address _Walletaddress) public onlyOwner {

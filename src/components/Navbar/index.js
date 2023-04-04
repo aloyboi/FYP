@@ -43,6 +43,13 @@ import {
     SET_INTEREST_RATE,
     LOG_MESSAGE,
     IS_MESSAGE_DISPLAY,
+    SET_CURR_AGAINST_TOKEN,
+    SET_CURR_REF_TOKEN,
+    SET_ROWS_BUY_GLOBALORDER,
+    SET_ROWS_SELL_GLOBALORDER,
+    SET_USER_BUY_ORDERS,
+    SET_USER_FILLED_ORDERS,
+    SET_USER_SELL_ORDERS,
 } from "../../redux/redux-actions/actions";
 import {
     getBorrowerData,
@@ -435,11 +442,17 @@ const Navbar = () => {
                     dispatch({ type: SET_ACCOUNT, payload: account[0] });
                     setCurrentAccount(account[0]);
                     getDeposit(account[0]);
+                    dispatch({ type: SET_USER_BUY_ORDERS, payload: [] });
+                    dispatch({ type: SET_USER_SELL_ORDERS, payload: [] });
+                    dispatch({ type: SET_USER_FILLED_ORDERS, payload: [] });
                 } else {
                     dispatch({ type: SET_ACCOUNT, payload: null });
                     dispatch({ type: SET_DEPOSIT_AMOUNT, payload: 0 });
                     dispatch({ type: SET_INTEREST_RATE, payload: 0 });
                     setCurrentAccount("");
+                    dispatch({ type: SET_USER_BUY_ORDERS, payload: [] });
+                    dispatch({ type: SET_USER_SELL_ORDERS, payload: [] });
+                    dispatch({ type: SET_USER_FILLED_ORDERS, payload: [] });
                 }
             });
         } catch (error) {
@@ -518,13 +531,27 @@ const Navbar = () => {
                         />
                     </Tabs>
                 </MenuArea>
-                <MenuArea style={{ position: "fixed", marginLeft: "750px" }}>
+                <MenuArea
+                    style={{
+                        position: "fixed",
+                        marginLeft: "750px",
+                    }}
+                >
                     {tabValue === "1" && curr != null ? (
-                        <div style={{ display: "flex", marginLeft: "60px" }}>
+                        <div
+                            style={{
+                                display: "flex",
+                                marginLeft: "60px",
+                                zIndex: 1,
+                            }}
+                        >
                             <Tooltip
                                 placement="left"
                                 arrow
-                                sx={{ marginRight: 0, marginLeft: "auto" }}
+                                sx={{
+                                    marginRight: 0,
+                                    marginLeft: "auto",
+                                }}
                             >
                                 <B
                                     aria-describedby={"transition-popper"}
@@ -542,6 +569,7 @@ const Navbar = () => {
                                 open={walletTab}
                                 anchorEl={anchorEl}
                                 transition
+                                sx={{ marginTop: "100px" }}
                             >
                                 {({ TransitionProps }) => (
                                     <Fade {...TransitionProps} timeout={350}>
@@ -553,7 +581,7 @@ const Navbar = () => {
                                                 backgroundColor: "#131823",
                                                 borderRadius: "30px",
                                                 display: "flex",
-
+                                                marginTop: "50px",
                                                 flexDirection: "column",
                                                 alignItems: "center",
                                             }}

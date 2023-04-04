@@ -164,10 +164,10 @@ const WorkHistory = ({ row, col, cardStyle }) => {
                         orderId: order[0],
                         type: order[1] === "0" ? "buy" : "sell",
                         tokenA: allTokens.filter(
-                            (token) => token.address === order[3]
+                            (token) => token.address == order[3]
                         )[0].symbol,
                         tokenB: allTokens.filter(
-                            (token) => token.address === order[4]
+                            (token) => token.address == order[4]
                         )[0].symbol,
                         amountFilled: order[5],
                         fillRate: order[6],

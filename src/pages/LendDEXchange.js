@@ -53,7 +53,7 @@ const LendDEXchange = () => {
                     <GlobalStyle />
 
                     <CryptoWrapper>
-                        <ContentWrapper>
+                        <ContentWrapper sx={{}}>
                             <Navbar></Navbar>
                             <Home></Home>
                             {/* <FaqSection></FaqSection> */}

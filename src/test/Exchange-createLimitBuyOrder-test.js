@@ -36,11 +36,11 @@ describe("Exchange", async function () {
         wallet1 = await ethers.getSigner(testwallet1);
 
         //Wallet Contract
-        walletAdd = "0x5Dc42ED6fda286668E899Ff73EE99E87116a33EB";
+        walletAdd = "0x505B75a3DB52A46aD61E8FA4fA28e071Fe6673A2";
         Wallet = new ethers.Contract(walletAdd, WalletABI.abi, wallet1);
 
         //Exchange Contract
-        exchangeAdd = "0x64a2aBa949Fd518c8bA52906C628A0B50549F16b";
+        exchangeAdd = "0xb2BaafC30f094A354c29e27e9bB054e616B9a04e";
         Exchange = new ethers.Contract(exchangeAdd, ExchangeABI.abi, wallet1);
         ethADD = "0x0000000000000000000000000000000000000000";
 
@@ -90,11 +90,11 @@ describe("Exchange", async function () {
                 .connect(wallet1)
                 .approve(Wallet.address, amountBInDecimals);
 
-            const depositToken = await Wallet.connect(wallet1).depositToken(
-                dai.address,
-                amountBInDecimals,
-                "18"
-            );
+            // const depositToken = await Wallet.connect(wallet1).depositToken(
+            //     dai.address,
+            //     amountBInDecimals,
+            //     "18"
+            // );
             const balance = await Wallet.connect(wallet1).balanceOf(
                 dai.address,
                 wallet1.address
@@ -104,6 +104,7 @@ describe("Exchange", async function () {
                 wallet1.address
             );
             console.log(balance.toString());
+            console.log(locked.toString());
             expect((balance - locked).toString()).to.be.equal(
                 amountBInDecimals.toString()
             );
@@ -150,9 +151,9 @@ describe("Exchange", async function () {
                 //Solana given
                 Exchange.createLimitBuyOrder(
                     "0x41848d32f281383f214c69b7b248dc7c2e0a7374",
-                    amountAInDecimals,
+                    amountAInDecimals.toString(),
                     usdc.address,
-                    amountBInDecimals,
+                    amountBInDecimals.toString(),
                     rate,
                     false
                 )

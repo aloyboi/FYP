@@ -1081,7 +1081,7 @@ const DexExchange = () => {
                                         defaultValue={0}
                                         sx={{
                                             width: "65%",
-                                            marginLeft: "145px",
+                                            marginLeft: "65px",
                                             marginTop: "12px",
                                             color: "white !important",
                                         }}

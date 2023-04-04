@@ -199,7 +199,7 @@ export default function StickyHeadTable(props) {
 
     const filledColumns = [
         {
-            id: "id",
+            id: "orderId",
             label: "From Order ID",
             minWidth: 130,
             align: "center",
@@ -213,14 +213,14 @@ export default function StickyHeadTable(props) {
             format: (value) => value.toLocaleString("en-US"),
         },
         {
-            id: "tokenNameA",
+            id: "tokenA",
             label: "For Token",
             minWidth: 130,
             align: "center",
             format: (value) => value.toLocaleString("en-US"),
         },
         {
-            id: "tokenNameB",
+            id: "tokenB",
             label: "Against Token",
             minWidth: 130,
             align: "center",
@@ -248,14 +248,14 @@ export default function StickyHeadTable(props) {
             format: (value) => value.toLocaleString("en-US"),
         },
         {
-            id: "waivefees",
+            id: "waiveFees",
             label: "Opt Waive Fees",
             minWidth: 130,
             align: "center",
             format: (value) => value.toLocaleString("en-US"),
         },
         {
-            id: "fees",
+            id: "feesPaid",
             label: "Fees paid (USD)",
             minWidth: 130,
             align: "center",

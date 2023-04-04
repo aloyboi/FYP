@@ -13,7 +13,7 @@ async function main() {
     const chainId = network.config.chainId;
 
     const Exchange = await exchange.deploy(
-        "0x04254C5476a174461476089089a07Df083a5b27D",
+        "0xb519733321EC872236016517FE0be29951741C52",
         "0xFdf2CAa88ceC5D43b627b4b3694aFF291Da69570",
         "0x2Eca751b14452a8Ba01DF9f698656112900c514c"
     );
@@ -24,7 +24,7 @@ async function main() {
         console.log("Waiting for block confirmations...");
         await Exchange.deployTransaction.wait(6);
         await verify(Exchange.address, [
-            "0x04254C5476a174461476089089a07Df083a5b27D",
+            "0xb519733321EC872236016517FE0be29951741C52",
             "0xFdf2CAa88ceC5D43b627b4b3694aFF291Da69570",
             "0x2Eca751b14452a8Ba01DF9f698656112900c514c",
         ]);

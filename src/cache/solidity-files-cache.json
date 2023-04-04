@@ -176,8 +176,8 @@
       ]
     },
     "C:\\Users\\Aloysius Seow\\Desktop\\SCHOOL\\FYP\\FYP\\src\\contracts\\Wallet.sol": {
-      "lastModificationDate": 1677836278163,
-      "contentHash": "7b57a860e656fdd74e8c62df499947f3",
+      "lastModificationDate": 1680317327455,
+      "contentHash": "c07485d23890ed786a5fbfe291675c41",
       "sourceName": "contracts/Wallet.sol",
       "solcConfig": {
         "version": "0.8.7",
@@ -212,6 +212,7 @@
       "imports": [
         "./ERC20.sol",
         "./Exchange.sol",
+        "./AMM.sol",
         "@openzeppelin/contracts/utils/math/SafeMath.sol",
         "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol",
         "@openzeppelin/contracts/access/Ownable.sol"
@@ -221,54 +222,6 @@
       ],
       "artifacts": [
         "Wallet"
-      ]
-    },
-    "C:\\Users\\Aloysius Seow\\Desktop\\SCHOOL\\FYP\\FYP\\src\\contracts\\Exchange.sol": {
-      "lastModificationDate": 1677737344717,
-      "contentHash": "b60132aa6d1ea6f1eb5884ecb271b5fe",
-      "sourceName": "contracts/Exchange.sol",
-      "solcConfig": {
-        "version": "0.8.7",
-        "settings": {
-          "optimizer": {
-            "enabled": false,
-            "runs": 200
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata",
-                "devdoc",
-                "userdoc",
-                "storageLayout",
-                "evm.gasEstimates"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          },
-          "metadata": {
-            "useLiteralContent": true
-          }
-        }
-      },
-      "imports": [
-        "./PriceChecker.sol",
-        "./TradingFees.sol",
-        "@openzeppelin/contracts/utils/math/SafeMath.sol",
-        "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol",
-        "@openzeppelin/contracts/access/Ownable.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.0"
-      ],
-      "artifacts": [
-        "Exchange"
       ]
     },
     "C:\\Users\\Aloysius Seow\\Desktop\\SCHOOL\\FYP\\FYP\\node_modules\\@openzeppelin\\contracts\\access\\Ownable.sol": {
@@ -957,6 +910,183 @@
       "imports": [],
       "versionPragmas": [],
       "artifacts": []
+    },
+    "C:\\Users\\Aloysius Seow\\Desktop\\SCHOOL\\FYP\\FYP\\src\\contracts\\Exchange2.sol": {
+      "lastModificationDate": 1679839327699,
+      "contentHash": "4b9be0f63d46277c90837a2af7924cda",
+      "sourceName": "contracts/Exchange2.sol",
+      "solcConfig": {
+        "version": "0.8.7",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [],
+      "artifacts": []
+    },
+    "C:\\Users\\Aloysius Seow\\Desktop\\SCHOOL\\FYP\\FYP\\src\\contracts\\AMM.sol": {
+      "lastModificationDate": 1680574983643,
+      "contentHash": "60fc88680925e706c4e249064b1caa88",
+      "sourceName": "contracts/AMM.sol",
+      "solcConfig": {
+        "version": "0.8.7",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [
+        "./Exchange.sol",
+        "./TradingFees.sol",
+        "./Wallet.sol",
+        "@openzeppelin/contracts/access/Ownable.sol",
+        "@openzeppelin/contracts/utils/math/SafeMath.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "AMM"
+      ]
+    },
+    "C:\\Users\\Aloysius Seow\\Desktop\\SCHOOL\\FYP\\FYP\\src\\contracts\\Exchange.sol": {
+      "lastModificationDate": 1680432645517,
+      "contentHash": "8c8adfc335236cfebd90d627508954f7",
+      "sourceName": "contracts/Exchange.sol",
+      "solcConfig": {
+        "version": "0.8.7",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [
+        "./PriceChecker.sol",
+        "./TradingFees.sol",
+        "./Wallet.sol",
+        "@openzeppelin/contracts/utils/math/SafeMath.sol",
+        "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol",
+        "@openzeppelin/contracts/access/Ownable.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "Exchange"
+      ]
+    },
+    "C:\\Users\\Aloysius Seow\\Desktop\\SCHOOL\\FYP\\FYP\\node_modules\\hardhat\\console.sol": {
+      "lastModificationDate": 1677210964873,
+      "contentHash": "4ff3cd2f6272c9a6516e9ee4f2b967d3",
+      "sourceName": "hardhat/console.sol",
+      "solcConfig": {
+        "version": "0.8.7",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">= 0.4.22 <0.9.0"
+      ],
+      "artifacts": [
+        "console"
+      ]
     }
   }
 }

@@ -13,6 +13,7 @@ import {
     SET_ROWS_BUY_GLOBALORDER,
     SET_ROWS_SELL_GLOBALORDER,
 } from "../../redux/redux-actions/actions";
+import { overflow, overflowY } from "styled-system";
 
 export default function StickyHeadTable(props) {
     const [page, setPage] = useState(0);
@@ -59,57 +60,6 @@ export default function StickyHeadTable(props) {
         },
     ];
 
-    // function createData(sizes, prices, rates) {
-    //     return { sizes, prices, rates };
-    // }
-
-    // const getTestDataGlobal = () => {
-    //     return globalOrders;
-    // };
-
-    // const getTestDataMyOrders = () => {
-    //     const array = [
-    //         { size: "Size1", price: "Price1", rate: 555, type: 0 },
-    //         { size: "Size9", price: "Price9", rate: 999, type: 1 },
-    //     ];
-    //     return array;
-    // };
-    // const getTestDataMyOrdersFulfilled = () => {
-    //     const array = [{ size: "Size10", price: "Price10", rate: 5, type: 0 }];
-    //     return array;
-    // };
-
-    // function generateRows(array, type) {
-    //     let temp = [];
-    //     setRows();
-    //     for (const obj of array) {
-    //         if (obj.type === type) {
-    //             temp.push(createData(obj.size, obj.price, obj.rate));
-    //         }
-    //     }
-    //     let orderType;
-    //     if (props.type === 0 && props.orderType === 2) {
-    //         orderType = 0;
-    //     } else if (props.type === 1 && props.orderType === 2) {
-    //         orderType = 1;
-    //     } else if (props.type === 0 && props.orderType === 3) {
-    //         orderType = 2;
-    //     } else if (props.type === 1 && props.orderType === 3) {
-    //         orderType = 3;
-    //     }
-    //     setRows(temp, orderType);
-    //     console.log(temp, "setRows");
-    // }
-    // useEffect(() => {
-    //     const arrGlobalOrders = getTestDataGlobal();
-    //     const arrMyOrdersUnfulfilled = getTestDataMyOrders();
-    //     const arrMyOrdersFulfilled = getTestDataMyOrdersFulfilled();
-    //     const arrMyOrders = arrMyOrdersUnfulfilled.concat(arrMyOrdersFulfilled);
-    //     props.orderType === 3
-    //         ? generateRows(arrGlobalOrders, props.type)
-    //         : generateRows(arrMyOrders, props.type);
-    //     // eslint-disable-next-line
-    // }, [globalOrders]);
     if (props.type === 0 && refToken != null && againstToken != null) {
         return (
             <div>

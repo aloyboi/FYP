@@ -3,6 +3,7 @@ require("@nomiclabs/hardhat-ethers");
 require("@nomiclabs/hardhat-etherscan");
 require("dotenv").config();
 require("hardhat-contract-sizer");
+// require("hardhat-babel-plugin");
 //require("solidity-coverage");
 require("hardhat-deploy");
 // You need to export an object to set up your config
@@ -30,7 +31,7 @@ module.exports = {
                 blockConfirmations: 6,
                 gas: 2100000000,
                 gasPrice: 30000000000,
-                blockNumber: 8704643,
+                blockNumber: 8747835,
             },
         },
         goerli: {
