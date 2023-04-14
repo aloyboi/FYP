@@ -189,13 +189,14 @@ const DexExchange = () => {
         let tokenDecimal = allTokens[refTokenSelected].decimals;
         let number = amt;
         let regex;
-        if (tokenDecimal == 18) regex = /^(?!0\d|$)\d*(\.\d{0,18})?$/;
-        else if (tokenDecimal == 6) regex = /^(?!0\d|$)\d*(\.\d{0,6})?$/;
+        // if (tokenDecimal == 18) regex = /^(?!0\d|$)\d*(\.\d{0,18})?$/;
+        // else if (tokenDecimal == 6) 
+        regex = /^(?!0\d|$)\d*(\.\d{0,6})?$/;
         const letterRegex = /^\d*\.?\d*$/;
 
         if (number === 0 || number === "") {
             setRefTokenAmount(0);
-            setRate(0);
+            // setRate(0);
             return;
         }
 
@@ -221,11 +222,13 @@ const DexExchange = () => {
             setRefTextFieldHtext("");
             setRefTokenAmount(number);
             if (rate != 0) {
-                setAgainstTokenAmount(number * rate);
-                validateAgainstTokenAmount(number * rate);
-            } else if (againstTokenAmount != 0 && rate == 0) {
-                setRate(againstTokenAmount / number);
-            }
+                setAgainstTokenAmount((number * rate).toFixed(6));
+                // validateAgainstTokenAmount(number * rate);
+            } 
+            else setAgainstTokenAmount(0);
+            // else if (againstTokenAmount != 0 && rate == 0) {
+            //     setRate(againstTokenAmount / number);
+            // }
             return;
         }
         // if (lastChar === "0") {
@@ -245,57 +248,65 @@ const DexExchange = () => {
             number = number.substring(1);
             setRefTokenAmount(number);
             if (rate != 0) {
-                setAgainstTokenAmount(number * rate);
-                validateAgainstTokenAmount(number * rate);
-            } else if (againstTokenAmount != 0 && rate == 0) {
-                setRate(againstTokenAmount / number);
-            }
+                setAgainstTokenAmount((number * rate).toFixed(6));
+                // validateAgainstTokenAmount(number * rate);
+            } 
+            else setAgainstTokenAmount(0);
+            // else if (againstTokenAmount != 0 && rate == 0) {
+            //     setRate(againstTokenAmount / number);
+            // }
             return;
         }
 
-        if (tokenDecimal == 18) {
-            //test for < 18 decimal places
-            if (regex.test(number)) {
-                setRefTextFieldHtext("");
-                setRefTextFieldError(false);
+        // if (tokenDecimal == 18) {
+        //     //test for < 18 decimal places
+        //     if (regex.test(number)) {
+        //         setRefTextFieldHtext("");
+        //         setRefTextFieldError(false);
 
-                setRefTokenAmount(number);
-                if (rate != 0) {
-                    setAgainstTokenAmount(number * rate);
-                    validateAgainstTokenAmount(number * rate);
-                } else if (againstTokenAmount != 0 && rate == 0) {
-                    setRate(againstTokenAmount / number);
-                }
-                return;
-            } else {
-                setRefTextFieldError(true);
-                setRefTextFieldHtext("Up to 18 decimal places");
-                setTimeout(() => {
-                    setRefTextFieldError(false);
-                    setRefTextFieldHtext("");
-                }, 2000);
-                number = toFixed(number, 18);
-                setRefTokenAmount(number);
-                if (rate != 0) {
-                    setAgainstTokenAmount(number * rate);
-                    validateAgainstTokenAmount(number * rate);
-                } else if (againstTokenAmount != 0 && rate == 0) {
-                    setRate(againstTokenAmount / number);
-                }
-                return;
-            }
-        } else if (tokenDecimal == 6) {
+        //         setRefTokenAmount(number);
+        //         if (rate != 0) {
+        //             setAgainstTokenAmount(number * rate);
+        //             validateAgainstTokenAmount(number * rate);
+        //         } 
+        //         else setAgainstTokenAmount(0);
+        //         // else if (againstTokenAmount != 0 && rate == 0) {
+        //         //     setRate(againstTokenAmount / number);
+        //         // }
+        //         return;
+        //     } else {
+        //         setRefTextFieldError(true);
+        //         setRefTextFieldHtext("Up to 18 decimal places");
+        //         setTimeout(() => {
+        //             setRefTextFieldError(false);
+        //             setRefTextFieldHtext("");
+        //         }, 2000);
+        //         number = toFixed(number, 18);
+        //         setRefTokenAmount(number);
+        //         if (rate != 0) {
+        //             setAgainstTokenAmount(number * rate);
+        //             validateAgainstTokenAmount(number * rate);
+        //         } 
+        //         else setAgainstTokenAmount(0);
+        //         // else if (againstTokenAmount != 0 && rate == 0) {
+        //         //     setRate(againstTokenAmount / number);
+        //         // }
+        //         return;
+        //     }
+        // } else if (tokenDecimal == 6) {
             //test for < 6 decimal places
             if (regex.test(number)) {
                 setRefTextFieldHtext("");
                 setRefTextFieldError(false);
                 setRefTokenAmount(number);
                 if (rate != 0) {
-                    setAgainstTokenAmount(number * rate);
-                    validateAgainstTokenAmount(number * rate);
-                } else if (againstTokenAmount != 0 && rate == 0) {
-                    setRate(againstTokenAmount / number);
+                    setAgainstTokenAmount((number * rate).toFixed(6));
+                    // validateAgainstTokenAmount(number * rate);
                 }
+                else setAgainstTokenAmount(0);
+                //  else if (againstTokenAmount != 0 && rate == 0) {
+                //     setRate(againstTokenAmount / number);
+                // }
             }
             //else reduce number to 6 decimal places
             else {
@@ -308,13 +319,15 @@ const DexExchange = () => {
                 number = toFixed(number, 6);
                 setRefTokenAmount(number);
                 if (rate != 0) {
-                    setAgainstTokenAmount(number * rate);
-                    validateAgainstTokenAmount(number * rate);
-                } else if (againstTokenAmount != 0 && rate == 0) {
-                    setRate(againstTokenAmount / number);
+                    setAgainstTokenAmount((number * rate).toFixed(6));
+                    // validateAgainstTokenAmount(number * rate);
                 }
+                else setAgainstTokenAmount(0); 
+                // else if (againstTokenAmount != 0 && rate == 0) {
+                //     setRate(againstTokenAmount / number);
+                // }
             }
-        }
+        // }
     };
 
     const validateAgainstTokenAmount = (amt) => {
@@ -332,8 +345,9 @@ const DexExchange = () => {
         let tokenDecimal = allTokens[againstTokenSelected].decimals;
         let number = amt;
         let regex;
-        if (tokenDecimal == 18) regex = /^(?!0\d|$)\d*(\.\d{0,18})?$/;
-        else if (tokenDecimal == 6) regex = /^(?!0\d|$)\d*(\.\d{0,6})?$/;
+        // if (tokenDecimal == 18) regex = /^(?!0\d|$)\d*(\.\d{0,18})?$/;
+        // else if (tokenDecimal == 6) 
+        regex = /^(?!0\d|$)\d*(\.\d{0,6})?$/;
         const letterRegex = /^\d*\.?\d*$/;
 
         if (number === 0 || number === "") {
@@ -364,11 +378,17 @@ const DexExchange = () => {
             setAgainstTextFieldHtext("");
             setAgainstTokenAmount(number);
 
-            if (refTokenAmount != 0) {
-                setRate(number / refTokenAmount);
-            } else if (refTokenAmount == 0 && rate != 0) {
-                setRefTokenAmount(number / rate);
+            if (rate!=0) {
+                // setRefTokenAmount(number / rate);
+                setRefTokenAmount((number / rate).toFixed(6));
             }
+            else setRefTokenAmount(0);
+
+            // if (refTokenAmount != 0) {
+            //     // setRate(number / refTokenAmount);
+            // } else if (refTokenAmount == 0 && rate != 0) {
+            //     setRefTokenAmount(number / rate);
+            // }
             return;
         }
         // if (lastChar === "0") {
@@ -387,57 +407,86 @@ const DexExchange = () => {
             setAgainstTextFieldHtext("");
             number = number.substring(1);
             setAgainstTokenAmount(number);
-            if (refTokenAmount != 0) {
-                setRate(number / refTokenAmount);
-            } else if (refTokenAmount == 0 && rate != 0) {
-                setRefTokenAmount(number / rate);
+
+            if (rate!=0) {
+                // setRefTokenAmount(number / rate);
+                setRefTokenAmount((number / rate).toFixed(6));
             }
+            else setRefTokenAmount(0);
+            
+            // if (refTokenAmount != 0) {
+            //     // setRate(number / refTokenAmount);
+            // } else if (refTokenAmount == 0 && rate != 0) {
+            //     setRefTokenAmount(number / rate);
+            // }
             return;
         }
 
-        if (tokenDecimal == 18) {
-            //test for < 18 decimal places
-            if (regex.test(number)) {
-                setRefTextFieldHtext("");
-                setRefTextFieldError(false);
+        // if (tokenDecimal == 18) {
+        //     //test for < 18 decimal places
+        //     if (regex.test(number)) {
+        //         setRefTextFieldHtext("");
+        //         setRefTextFieldError(false);
 
-                setAgainstTokenAmount(number);
-                if (refTokenAmount != 0) {
-                    setRate(number / refTokenAmount);
-                } else if (refTokenAmount == 0 && rate != 0) {
-                    setRefTokenAmount(number / rate);
-                    validateRefTokenAmount(number / rate);
-                }
-                return;
-            } else {
-                setAgainstTextFieldError(true);
-                setAgainstTextFieldHtext("Up to 18 decimal places");
-                setTimeout(() => {
-                    setAgainstTextFieldError(false);
-                    setAgainstTextFieldHtext("");
-                }, 2000);
-                number = toFixed(number, 18);
-                setAgainstTokenAmount(number);
-                if (refTokenAmount != 0) {
-                    setRate(number / refTokenAmount);
-                } else if (refTokenAmount == 0 && rate != 0) {
-                    setRefTokenAmount(number / rate);
-                    validateRefTokenAmount(number / rate);
-                }
-                return;
-            }
-        } else if (tokenDecimal == 6) {
+        //         setAgainstTokenAmount(number);
+
+        //         if (rate!=0) {
+        //             setRefTokenAmount(number / rate);
+        //             validateRefTokenAmount(number / rate);
+        //         }
+        //         else setRefTokenAmount(0);
+
+                
+        //         // if (refTokenAmount != 0) {
+        //         //     setRate(number / refTokenAmount);
+        //         // } else if (refTokenAmount == 0 && rate != 0) {
+        //         //     setRefTokenAmount(number / rate);
+        //         //     validateRefTokenAmount(number / rate);
+        //         // }
+        //         return;
+        //     } else {
+        //         setAgainstTextFieldError(true);
+        //         setAgainstTextFieldHtext("Up to 18 decimal places");
+        //         setTimeout(() => {
+        //             setAgainstTextFieldError(false);
+        //             setAgainstTextFieldHtext("");
+        //         }, 2000);
+        //         number = toFixed(number, 18);
+        //         setAgainstTokenAmount(number);
+
+        //         if (rate!=0) {
+        //             setRefTokenAmount(number / rate);
+        //             validateRefTokenAmount(number / rate);
+        //         }
+        //         else setRefTokenAmount(0);
+
+        //         // if (refTokenAmount != 0) {
+        //         //     setRate(number / refTokenAmount);
+        //         // } else if (refTokenAmount == 0 && rate != 0) {
+        //         //     setRefTokenAmount(number / rate);
+        //         //     validateRefTokenAmount(number / rate);
+        //         // }
+        //         return;
+        //     }
+        // } else if (tokenDecimal == 6) {
             //test for < 6 decimal places
             if (regex.test(number)) {
                 setAgainstTextFieldHtext("");
                 setAgainstTextFieldError(false);
                 setAgainstTokenAmount(number);
-                if (refTokenAmount != 0) {
-                    setRate(number / refTokenAmount);
-                } else if (refTokenAmount == 0 && rate != 0) {
-                    setRefTokenAmount(number / rate);
-                    validateRefTokenAmount(number / rate);
+
+                if (rate!=0) {
+                    // setRefTokenAmount(number / rate);
+                    setRefTokenAmount((number / rate).toFixed(6));
                 }
+                else setRefTokenAmount(0);
+
+                // if (refTokenAmount != 0) {
+                //     setRate(number / refTokenAmount);
+                // } else if (refTokenAmount == 0 && rate != 0) {
+                //     setRefTokenAmount(number / rate);
+                //     validateRefTokenAmount(number / rate);
+                // }
             }
             //else reduce number to 6 decimal places
             else {
@@ -449,14 +498,21 @@ const DexExchange = () => {
                 }, 2000);
                 number = toFixed(number, 6);
                 setAgainstTokenAmount(number);
-                if (refTokenAmount != 0) {
-                    setRate(number / refTokenAmount);
-                } else if (refTokenAmount == 0 && rate != 0) {
-                    setRefTokenAmount(number / rate);
-                    validateRefTokenAmount(number / rate);
+
+                if (rate!=0) {
+                    // setRefTokenAmount(number / rate);
+                    setRefTokenAmount((number / rate).toFixed(6));
                 }
+                else setRefTokenAmount(0);
+
+                // if (refTokenAmount != 0) {
+                //     setRate(number / refTokenAmount);
+                // } else if (refTokenAmount == 0 && rate != 0) {
+                //     setRefTokenAmount(number / rate);
+                //     validateRefTokenAmount(number / rate);
+                // }
             }
-        }
+        // }
     };
 
     const addTokens = () => {
@@ -517,6 +573,7 @@ const DexExchange = () => {
 
         //test for letters
         if (!letterRegex.test(number)) {
+            console.log("Enter 4");
             setRateTextFieldError(true);
             setRateTextFieldHtext("Please enter valid numbers only");
             // turn off error after 2 seconds
@@ -533,6 +590,7 @@ const DexExchange = () => {
         const firstChar = charNum[0];
         const secondChar = charNum[1];
         if (lastChar === ".") {
+            console.log("Enter 5");
             setRateTextFieldError(false);
             setRateTextFieldHtext("");
             setRate(number);
@@ -547,6 +605,7 @@ const DexExchange = () => {
         }
 
         if (firstChar === "0" && secondChar !== ".") {
+            console.log("Enter 3");
             setRateTextFieldError(false);
             setRateTextFieldHtext("");
             number = number.substring(1);
@@ -559,8 +618,10 @@ const DexExchange = () => {
             return;
         }
 
-        let regex = /^(?!0\d|$)\d*(\.\d{0,18})?$/;
+        // let regex = /^(?!0\d|$)\d*(\.\d{0,18})?$/;
+        let regex = /^(?!0\d|$)\d*(\.\d{0,6})?$/;
         if (regex.test(number)) {
+            console.log("Enter 1");
             setRateTextFieldHtext("");
             setRateTextFieldError(false);
             setRate(number);
@@ -573,13 +634,14 @@ const DexExchange = () => {
             }
             return;
         } else {
+            console.log("Enter 2");
             setRateTextFieldError(true);
-            setRateTextFieldHtext("Up to 18 decimal places");
+            setRateTextFieldHtext("Up to 6 decimal places");
             setTimeout(() => {
                 setRateTextFieldError(false);
                 setRateTextFieldHtext("");
             }, 2000);
-            number = toFixed(number, 18);
+            number = toFixed(number, 6);
             setRate(number);
             if (refTokenAmount != 0) {
                 setAgainstTokenAmount(number * refTokenAmount);
@@ -645,7 +707,10 @@ const DexExchange = () => {
         const tokenA = await refTokenPrice;
         const tokenB = await againstTokenPrice;
 
-        setPricePair(tokenA / tokenB);
+        const pairPrice = tokenA / tokenB;
+
+
+        setPricePair(pairPrice.toFixed(6));
     };
 
     useEffect(() => {
@@ -1018,6 +1083,7 @@ const DexExchange = () => {
                                                     }}
                                                     onClick={() => {
                                                         setRate(pricePair);
+                                                        validateRate(pricePair);
                                                     }}
                                                 >
                                                     Market Sell{" "}
