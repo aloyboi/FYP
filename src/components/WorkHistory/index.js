@@ -219,8 +219,8 @@ const WorkHistory = ({ row, col, cardStyle }) => {
                                         sx={{
                                             width: "150px",
                                             color: "white",
-                                            position: "fixed",
-                                            marginLeft: "400px",
+                                            position: "absolute",
+                                            marginLeft: "380px",
                                         }}
                                     >
                                         <MenuItem value={0}>
