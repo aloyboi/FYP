@@ -32,5 +32,13 @@ export const data = {
             logoURI:
                 "https://tokens.1inch.io/0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.png",
         },
+        // {
+        //     name: "Synthetix",
+        //     symbol: "SNX",
+        //     address: "0xd97832f30EFb1eEe4A229730f4A200db5a9A4d17",
+        //     decimals: 18,
+        //     logoURI:
+        //         "https://tokens.1inch.io/0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f.png",
+        // },
     ],
 };

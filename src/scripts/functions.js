@@ -243,7 +243,7 @@ export async function createLimitBuyOrder(
     _amountB,
     _rate,
     waiveFees,
-    // callbackOrderCreated,
+    callbackOrderCreated,
     callbackOrderFilled,
     errorCallback
 ) {
@@ -262,11 +262,11 @@ export async function createLimitBuyOrder(
             waiveFees
         );
         await transaction.wait();
-        // if (typeof callbackOrderCreated == "function") {
-        //     callbackOrderCreated(
-        //         `Order placed, order id:${orderId.toString()}`
-        //     );
-        // }
+        if (typeof callbackOrderCreated == "function") {
+            callbackOrderCreated(
+                `Order placed, order id:${orderId.toString()}`
+            );
+        }
         const fillOrder = await matchBuyOrders(_tokenA, _tokenB, orderId);
 
         if (typeof callbackOrderFilled == "function") {
@@ -353,10 +353,11 @@ async function matchBuyOrders(_tokenA, _tokenB, _id) {
     let saleTokenAmt;
     let orderstoFill = [];
     let buy;
-    let i;
+    let x;
 
     try {
-        [buy, i] = await exchange.getOrderFromArray(_tokenA, _tokenB, "0", _id);
+        console.log("Entered");
+        [buy, x] = await exchange.getOrderFromArray(_tokenA, _tokenB, "0", _id);
 
         let buyOrderToFill = [...buy];
         buyOrderToFill[0] = ethers.BigNumber.from(buyOrderToFill[0]);
@@ -368,6 +369,9 @@ async function matchBuyOrders(_tokenA, _tokenB, _id) {
         buyOrderToFill[9] = ethers.BigNumber.from(buyOrderToFill[9]);
 
         length = await exchange.getOrderLength("1", _tokenA, _tokenB);
+        length = ethers.BigNumber.from(length);
+
+        let i = ethers.BigNumber.from(0);
 
         //all in 18 decimals
         for (let i = 0; i < length; i++) {
@@ -383,11 +387,11 @@ async function matchBuyOrders(_tokenA, _tokenB, _id) {
 
             //Check Rate satisfies trade conditions and same users cannot fill their own orders
             if (
-                modifiedOrder[7] <= sellOrderToFill[7] &&
+                modifiedOrder[7].lte(buyOrderToFill[7]) &&
                 modifiedOrder[2] != buyOrderToFill[2]
             ) {
                 {
-                    buyOrderToFill[4] > modifiedOrder[4]
+                    buyOrderToFill[4].gt(modifiedOrder[4])
                         ? (saleTokenAmt = modifiedOrder[4])
                         : (saleTokenAmt = buyOrderToFill[4]);
                 }
@@ -403,12 +407,13 @@ async function matchBuyOrders(_tokenA, _tokenB, _id) {
                 orderstoFill.push(buyOrder);
                 orderstoFill.push(sellOrder);
 
-                buyOrderToFill[4] = buyOrderToFill[4] - saleTokenAmt;
+                buyOrderToFill[4] = buyOrderToFill[4].sub(saleTokenAmt);
 
                 if (buyOrderToFill[4] == 0) break;
             }
         }
-        console.log("Orders to fill: " + orderstoFill);
+
+        if (orderstoFill.length == 0) return;
 
         //Convert to solidity type
         let solidityArray = new Array(orderstoFill.length);
@@ -420,7 +425,7 @@ async function matchBuyOrders(_tokenA, _tokenB, _id) {
             }
         }
         const fill = await amm.fillOrder(_tokenA, _tokenB, solidityArray, {
-            gasLimit: 1000000,
+            gasLimit: 10000000,
         });
         await fill.wait();
     } catch (error) {
@@ -437,10 +442,10 @@ async function matchSellOrders(_tokenA, _tokenB, _id) {
     let saleTokenAmt;
     let orderstoFill = [];
     let sell;
-    let i;
+    let x;
 
     try {
-        [sell, i] = await exchange.getOrderFromArray(
+        [sell, x] = await exchange.getOrderFromArray(
             _tokenA,
             _tokenB,
             "1",
@@ -457,6 +462,9 @@ async function matchSellOrders(_tokenA, _tokenB, _id) {
         sellOrderToFill[9] = ethers.BigNumber.from(sellOrderToFill[9]);
 
         length = await exchange.getOrderLength("0", _tokenA, _tokenB);
+        length = ethers.BigNumber.from(length);
+
+        let i = ethers.BigNumber.from(0);
 
         //all in 18 decimals
         for (let i = 0; i < length; i++) {
@@ -472,11 +480,11 @@ async function matchSellOrders(_tokenA, _tokenB, _id) {
 
             //Check Rate satisfies trade conditions and same users cannot fill their own orders
             if (
-                modifiedOrder[7] >= sellOrderToFill[7] &&
+                modifiedOrder[7].gte(sellOrderToFill[7]) &&
                 modifiedOrder[2] != sellOrderToFill[2]
             ) {
                 {
-                    sellOrderToFill[4] > modifiedOrder[4]
+                    sellOrderToFill[4].gt(modifiedOrder[4])
                         ? (saleTokenAmt = modifiedOrder[4])
                         : (saleTokenAmt = sellOrderToFill[4]);
                 }
@@ -492,12 +500,13 @@ async function matchSellOrders(_tokenA, _tokenB, _id) {
                 orderstoFill.push(sellOrder);
                 orderstoFill.push(buyOrder);
 
-                sellOrderToFill[4] = sellOrderToFill[4] - saleTokenAmt;
+                sellOrderToFill[4] = sellOrderToFill[4].sub(saleTokenAmt);
 
                 if (sellOrderToFill[4] == 0) break;
             }
         }
-        console.log("Orders to fill: " + orderstoFill);
+
+        if (orderstoFill.length == 0) return;
 
         //Convert to solidity type
         let solidityArray = new Array(orderstoFill.length);
@@ -509,7 +518,7 @@ async function matchSellOrders(_tokenA, _tokenB, _id) {
             }
         }
         const fill = await amm.fillOrder(_tokenA, _tokenB, solidityArray, {
-            gasLimit: 1000000,
+            gasLimit: 10000000,
         });
         await fill.wait();
     } catch (error) {

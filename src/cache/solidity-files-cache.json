@@ -176,7 +176,7 @@
       ]
     },
     "C:\\Users\\Aloysius Seow\\Desktop\\SCHOOL\\FYP\\FYP\\src\\contracts\\Wallet.sol": {
-      "lastModificationDate": 1680317327455,
+      "lastModificationDate": 1681012885034,
       "contentHash": "c07485d23890ed786a5fbfe291675c41",
       "sourceName": "contracts/Wallet.sol",
       "solcConfig": {
@@ -911,47 +911,9 @@
       "versionPragmas": [],
       "artifacts": []
     },
-    "C:\\Users\\Aloysius Seow\\Desktop\\SCHOOL\\FYP\\FYP\\src\\contracts\\Exchange2.sol": {
-      "lastModificationDate": 1679839327699,
-      "contentHash": "4b9be0f63d46277c90837a2af7924cda",
-      "sourceName": "contracts/Exchange2.sol",
-      "solcConfig": {
-        "version": "0.8.7",
-        "settings": {
-          "optimizer": {
-            "enabled": false,
-            "runs": 200
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata",
-                "devdoc",
-                "userdoc",
-                "storageLayout",
-                "evm.gasEstimates"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          },
-          "metadata": {
-            "useLiteralContent": true
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [],
-      "artifacts": []
-    },
     "C:\\Users\\Aloysius Seow\\Desktop\\SCHOOL\\FYP\\FYP\\src\\contracts\\AMM.sol": {
-      "lastModificationDate": 1680574983643,
-      "contentHash": "60fc88680925e706c4e249064b1caa88",
+      "lastModificationDate": 1681215252823,
+      "contentHash": "c53275401b3d293cf35539de32b79ccc",
       "sourceName": "contracts/AMM.sol",
       "solcConfig": {
         "version": "0.8.7",
@@ -998,8 +960,8 @@
       ]
     },
     "C:\\Users\\Aloysius Seow\\Desktop\\SCHOOL\\FYP\\FYP\\src\\contracts\\Exchange.sol": {
-      "lastModificationDate": 1680432645517,
-      "contentHash": "8c8adfc335236cfebd90d627508954f7",
+      "lastModificationDate": 1681192844991,
+      "contentHash": "be8bde8051b6a8f3b296d7ba1cc149a6",
       "sourceName": "contracts/Exchange.sol",
       "solcConfig": {
         "version": "0.8.7",

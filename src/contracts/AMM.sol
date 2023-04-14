@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "./Exchange.sol"; // Import the old contract that contains the original function
+import "./Exchange.sol";
 import "./TradingFees.sol";
 import "./Wallet.sol";
 
@@ -42,7 +42,6 @@ contract AMM is Ownable {
         address _tokenB,
         uint256[][] memory _ordersToFill
     ) external {
-        // Copy the function code from the old contract and replace any references to state variables with "oldContract.stateVariableName"
         Exchange._Order memory order;
         uint256 index;
 
@@ -51,6 +50,7 @@ contract AMM is Ownable {
                 _ordersToFill[i][2] != 0 && _ordersToFill[i][3] != 0,
                 "Order values error"
             );
+
             (order, index) = exchange.getOrderFromArray(
                 _tokenA,
                 _tokenB,
@@ -62,7 +62,6 @@ contract AMM is Ownable {
                 order.amountA != 0 && order.amountB != 0,
                 "Invalid Order Amount"
             );
-
             exchange.updateOrder(
                 order,
                 order.amountA.sub(_ordersToFill[i][2]),
@@ -200,7 +199,6 @@ contract AMM is Ownable {
             (_rate.mul(_amount)).div(decimals),
             false
         );
-
         exchange.updateFilledOrders(
             Exchange._filledOrder(
                 order.id,
@@ -256,7 +254,7 @@ contract AMM is Ownable {
                 fees
             );
             wallet.exchangeUpdateBalance(
-                order.tokenA,
+                order.tokenB,
                 wallet.fundWallet(),
                 amountTokensToDeduct,
                 true

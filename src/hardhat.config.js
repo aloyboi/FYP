@@ -2,6 +2,7 @@ require("hardhat-gas-reporter");
 require("@nomiclabs/hardhat-ethers");
 require("@nomiclabs/hardhat-etherscan");
 require("dotenv").config();
+require("hardhat-tracer");
 require("hardhat-contract-sizer");
 // require("hardhat-babel-plugin");
 //require("solidity-coverage");
@@ -31,7 +32,7 @@ module.exports = {
                 blockConfirmations: 6,
                 gas: 2100000000,
                 gasPrice: 30000000000,
-                blockNumber: 8747835,
+                blockNumber: 8798758,
             },
         },
         goerli: {

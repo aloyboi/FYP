@@ -9,7 +9,7 @@ import "./index.css";
 
 export default function SnackBar() {
     const message = useSelector((state) => state.message.message);
-    const vertical = "top";
+    const vertical = "bottom";
     const horizontal = "center";
     const isMessageDisplay = useSelector(
         (state) => state.message.is_message_display

@@ -683,8 +683,16 @@ const Navbar = () => {
                                                     marginTop: "70px",
                                                 }}
                                             >
-                                                <Tab label="Tokens" value="0" />
-                                                <Tab label="aDAI" value="1" />
+                                                <Tab
+                                                    label="Tokens"
+                                                    value="0"
+                                                    sx={{ color: "grey" }}
+                                                />
+                                                <Tab
+                                                    label="aDAI"
+                                                    value="1"
+                                                    sx={{ color: "grey" }}
+                                                />
                                             </Tabs>
                                             {tokensTab === "0" ? (
                                                 <div>

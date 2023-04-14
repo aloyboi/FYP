@@ -23,6 +23,7 @@
     "dotenv": "^16.0.3",
     "ethers": "^5.7.1",
     "flatted": "^3.2.7",
+    "hardhat-tracer": "^2.2.2",
     "lodash.debounce": "^4.0.8",
     "material-ui": "^0.20.2",
     "mui": "^0.0.1",

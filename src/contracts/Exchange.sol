@@ -283,11 +283,10 @@ contract Exchange is Ownable {
                 );
             }
         }
-
         for (uint256 j = index; j < size - 1; j++) {
             _order[j] = _order[j.add(1)];
         }
-        delete _order[size.sub(1)];
+
         _order.pop();
 
         s_orderBook[_tokenA][_tokenB][_side] = _order;

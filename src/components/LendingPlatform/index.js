@@ -160,8 +160,8 @@ const LendingPlatform = () => {
                             className="discountText"
                             content={
                                 totalCollateralDAI != 0
-                                    ? totalCollateralDAI + " DAI"
-                                    : "0 DAI"
+                                    ? totalCollateralDAI + " aDAI"
+                                    : "0 aDAI"
                             }
                         />
                     </DiscountLabel>

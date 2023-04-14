@@ -1,13 +1,12 @@
 const { expect, assert } = require("chai");
 const { ethers } = require("hardhat");
-// const { check } = require("prettier");
 const Wallet = require("../artifacts/contracts/Wallet.sol/Wallet.json");
 const helpers = require("@nomicfoundation/hardhat-network-helpers");
 const ABI = require("../TokenABIS/tokenABI.json");
 
 const testwallet1 = process.env.TEST_WALLET_1;
 const testwallet2 = process.env.TEST_WALLET_2;
-const walletAddress = process.env.WALLET_ADDRESS;
+const GOERLI_RPC_URL = process.env.GOERLI_RPC_URL;
 
 describe("Wallet", async () => {
     let walletContract;
@@ -17,10 +16,22 @@ describe("Wallet", async () => {
     let dai;
     let walletAdd;
     beforeEach(async () => {
+        await network.provider.request({
+            method: "hardhat_reset",
+            params: [
+                {
+                    forking: {
+                        jsonRpcUrl: GOERLI_RPC_URL,
+                        blockNumber: 8804292,
+                    },
+                },
+            ],
+        });
+
         await helpers.impersonateAccount(testwallet1);
         wallet1 = await ethers.getSigner(testwallet1);
 
-        walletAdd = "0x5Dc42ED6fda286668E899Ff73EE99E87116a33EB";
+        walletAdd = "0xc1ee82417b4374d04451b67ce26a2cbe9647505e";
         walletContract = new ethers.Contract(walletAdd, Wallet.abi, wallet1);
 
         ethADD = "0x0000000000000000000000000000000000000000";
@@ -39,7 +50,6 @@ describe("Wallet", async () => {
             const value = ethers.utils.parseEther("1.24").toString();
 
             const depositETH = await walletContract.depositETH({
-                value: value,
                 value: value,
             });
             await depositETH.wait();
