@@ -3,7 +3,7 @@ const chai = require("chai");
 const chaiAsPromised = require("chai-as-promised");
 chai.use(chaiAsPromised);
 const WalletABI = require("../artifacts/contracts/Wallet.sol/Wallet.json");
-const AmmABI = require("../artifacts/contracts/AMM.sol/AMM.json");
+const fillLogicABI = require("../artifacts/contracts/fillLogic.sol/fillLogic.json");
 const { ethers } = require("hardhat");
 const ExchangeABI = require("../artifacts/contracts/Exchange.sol/Exchange.json");
 const ABI = require("../TokenABIS/tokenABI.json");
@@ -13,7 +13,7 @@ const { order } = require("styled-system");
 
 const GOERLI_RPC_URL = process.env.GOERLI_RPC_URL;
 
-async function matchBuyOrders(_tokenA, _tokenB, _id, exchange, amm) {
+async function matchBuyOrders(_tokenA, _tokenB, _id, exchange, fillLogic) {
     let saleTokenAmt;
     let orderstoFill = [];
     let buy;
@@ -89,9 +89,14 @@ async function matchBuyOrders(_tokenA, _tokenB, _id, exchange, amm) {
                 solidityArray[i][j] = orderstoFill[i][j].toString();
             }
         }
-        const fill = await amm.fillOrder(_tokenA, _tokenB, solidityArray, {
-            gasLimit: 15000000,
-        });
+        const fill = await fillLogic.fillOrder(
+            _tokenA,
+            _tokenB,
+            solidityArray,
+            {
+                gasLimit: 15000000,
+            }
+        );
 
         await fill.wait();
     } catch (error) {
@@ -99,7 +104,7 @@ async function matchBuyOrders(_tokenA, _tokenB, _id, exchange, amm) {
     }
 }
 
-async function matchSellOrders(_tokenA, _tokenB, _id, exchange, amm) {
+async function matchSellOrders(_tokenA, _tokenB, _id, exchange, fillLogic) {
     let saleTokenAmt;
     let orderstoFill = [];
     let sell;
@@ -181,16 +186,21 @@ async function matchSellOrders(_tokenA, _tokenB, _id, exchange, amm) {
                 solidityArray[i][j] = orderstoFill[i][j].toString();
             }
         }
-        const fill = await amm.fillOrder(_tokenA, _tokenB, solidityArray, {
-            gasLimit: 15000000,
-        });
+        const fill = await fillLogic.fillOrder(
+            _tokenA,
+            _tokenB,
+            solidityArray,
+            {
+                gasLimit: 15000000,
+            }
+        );
         await fill.wait();
     } catch (error) {
         console.log(error);
     }
 }
 
-describe("AMM", async function () {
+describe("fillLogic Contract", async function () {
     let amountA;
     let amountB;
     let amountAInDecimals;
@@ -204,6 +214,7 @@ describe("AMM", async function () {
     let wallet1, wallet2, wallet3;
     let dai;
     let walletAdd;
+    let fillLogicAdd, FillLogic;
     let usdc;
     let usdcAdd;
     let exchangeAdd;
@@ -220,7 +231,7 @@ describe("AMM", async function () {
                 {
                     forking: {
                         jsonRpcUrl: GOERLI_RPC_URL,
-                        blockNumber: 8804292,
+                        blockNumber: 8826794,
                     },
                 },
             ],
@@ -236,16 +247,20 @@ describe("AMM", async function () {
         wallet3 = await ethers.getSigner(testwallet3);
 
         //Wallet Contract
-        walletAdd = "0xc1ee82417b4374d04451b67ce26a2cbe9647505e";
+        walletAdd = "0x11a6540e1357f29cbc9e04a6ac6893089899b6bd";
         Wallet = new ethers.Contract(walletAdd, WalletABI.abi, wallet1);
 
         //Exchange Contract
         exchangeAdd = "0xf9a807cc8fe9439df69708423fbc2e5697ecd4b3";
         Exchange = new ethers.Contract(exchangeAdd, ExchangeABI.abi, wallet1);
 
-        //AMM contract
-        ammAdd = "0x30cfc66dbd17dda106bb5ef2856c4c842b70fb33";
-        AMM = new ethers.Contract(ammAdd, AmmABI.abi, wallet1);
+        //fillLogic contract
+        fillLogicAdd = "0x36f282cc7d0971d3029696e542db2c06dfd28485";
+        FillLogic = new ethers.Contract(
+            fillLogicAdd,
+            fillLogicABI.abi,
+            wallet1
+        );
 
         //DAI token
         daiAdd = "0xBa8DCeD3512925e52FE67b1b5329187589072A55";
@@ -334,7 +349,7 @@ describe("AMM", async function () {
                     dai.address,
                     sellOrderId.toString(),
                     Exchange,
-                    AMM
+                    FillLogic
                 )
             ).to.not.be.rejected;
 
@@ -404,7 +419,7 @@ describe("AMM", async function () {
                 usdc.address,
                 sellOrderId.toString(),
                 Exchange,
-                AMM
+                FillLogic
             );
 
             expect(
@@ -511,7 +526,7 @@ describe("AMM", async function () {
                 usdc.address,
                 sellOrderId.toString(),
                 Exchange,
-                AMM
+                FillLogic
             );
 
             expect(
@@ -618,7 +633,7 @@ describe("AMM", async function () {
                 usdc.address,
                 sellOrderId.toString(),
                 Exchange,
-                AMM
+                FillLogic
             );
 
             expect(
@@ -655,7 +670,7 @@ describe("AMM", async function () {
             const fillBuyOrder = await Exchange.getFilledOrder(
                 wallet1.address,
                 0,
-                0
+                1
             );
             expect(fillBuyOrder.amountFilled.toString()).to.be.equal(
                 amountAInDecimals.toString()
@@ -667,7 +682,7 @@ describe("AMM", async function () {
             const fillSellOrder = await await Exchange.getFilledOrder(
                 wallet2.address,
                 1,
-                0
+                1
             );
             expect(fillSellOrder.amountFilled.toString()).to.be.equal(
                 amountAInDecimals.toString()
@@ -734,7 +749,7 @@ describe("AMM", async function () {
                 dai.address,
                 buyOrderId.toString(),
                 Exchange,
-                AMM
+                FillLogic
             );
 
             expect(
@@ -776,7 +791,7 @@ describe("AMM", async function () {
             const fillBuyOrder = await Exchange.getFilledOrder(
                 wallet1.address,
                 0,
-                0
+                1
             );
             expect(fillBuyOrder.amountFilled.toString()).to.be.equal(
                 amountAInDecimals.toString()
@@ -788,7 +803,7 @@ describe("AMM", async function () {
             const fillSellOrder = await await Exchange.getFilledOrder(
                 wallet2.address,
                 1,
-                0
+                1
             );
             expect(fillSellOrder.amountFilled.toString()).to.be.equal(
                 amountAInDecimals.toString()
@@ -856,7 +871,7 @@ describe("AMM", async function () {
                 dai.address,
                 buyOrderId.toString(),
                 Exchange,
-                AMM
+                FillLogic
             );
 
             expect(
@@ -963,7 +978,7 @@ describe("AMM", async function () {
                 usdc.address,
                 buyOrderId.toString(),
                 Exchange,
-                AMM
+                FillLogic
             );
 
             order1 = await Exchange.getOrder(ethAdd, usdc.address, 0, 0);
@@ -1033,7 +1048,7 @@ describe("AMM", async function () {
             const fillBuyOrder = await Exchange.s_filledOrders(
                 wallet1.address,
                 0,
-                0
+                1
             );
             expect(fillBuyOrder.amountFilled.toString()).to.be.equal(
                 (0.005 * 10 ** 18).toString()
@@ -1042,17 +1057,17 @@ describe("AMM", async function () {
             const fillBuyOrder1 = await Exchange.s_filledOrders(
                 wallet1.address,
                 0,
-                1
+                2
             );
             expect(fillBuyOrder1.amountFilled.toString()).to.be.equal(
                 (0.003 * 10 ** 18).toString()
             );
 
-            //First Sell Order
+            // //First Sell Order
             const fillSellOrder = await Exchange.s_filledOrders(
                 wallet2.address,
                 1,
-                0
+                1
             );
             expect(fillSellOrder.amountFilled.toString()).to.be.equal(
                 (0.005 * 10 ** 18).toString()
@@ -1149,7 +1164,7 @@ describe("AMM", async function () {
                 usdc.address,
                 sellOrderId.toString(),
                 Exchange,
-                AMM
+                FillLogic
             );
 
             expect(
@@ -1233,7 +1248,7 @@ describe("AMM", async function () {
             const fillBuyOrder = await Exchange.s_filledOrders(
                 wallet1.address,
                 0,
-                0
+                1
             );
             expect(fillBuyOrder.amountFilled.toString()).to.be.equal(
                 (0.002 * 10 ** 18).toString()
@@ -1243,7 +1258,7 @@ describe("AMM", async function () {
             const fillBuyOrder1 = await Exchange.s_filledOrders(
                 wallet2.address,
                 0,
-                1
+                3
             );
             expect(fillBuyOrder1.amountFilled.toString()).to.be.equal(
                 (0.006 * 10 ** 18).toString()

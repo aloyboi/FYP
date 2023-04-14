@@ -1,7 +1,7 @@
 import { ethers } from "ethers";
 import Wallet from "../artifacts/contracts/Wallet.sol/Wallet.json";
 import Exchange from "../artifacts/contracts/Exchange.sol/Exchange.json";
-import AMM from "../artifacts/contracts/AMM.sol/AMM.json";
+import fillLogic from "../artifacts/contracts/fillLogic.sol/fillLogic.json";
 import PriceChecker from "../artifacts/contracts/PriceChecker.sol/PriceChecker.json";
 import TradingFees from "../artifacts/contracts/TradingFees.sol/TradingFees.json";
 import ERC20 from "../artifacts/contracts/ERC20.sol/ERC20.json";
@@ -10,7 +10,7 @@ import { order } from "styled-system";
 const walletAddress = process.env.REACT_APP_WALLET_ADDRESS;
 const exchangeAddress = process.env.REACT_APP_EXCHANGE_ADDRESS;
 const priceCheckerAddress = process.env.REACT_APP_PRICECHECKER_ADDRESS;
-const ammAddress = process.env.REACT_APP_AMM_ADDRESS;
+const fillLogicAddress = process.env.REACT_APP_FILLLOGIC_ADDRESS;
 const decimals = 18;
 
 export async function depositETH(_amount, callback, errorCallback) {
@@ -348,7 +348,11 @@ async function matchBuyOrders(_tokenA, _tokenB, _id) {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const signer = provider.getSigner();
     const exchange = new ethers.Contract(exchangeAddress, Exchange.abi, signer);
-    const amm = new ethers.Contract(ammAddress, AMM.abi, signer);
+    const fillContract = new ethers.Contract(
+        fillLogicAddress,
+        fillLogic.abi,
+        signer
+    );
 
     let saleTokenAmt;
     let orderstoFill = [];
@@ -424,9 +428,14 @@ async function matchBuyOrders(_tokenA, _tokenB, _id) {
                 solidityArray[i][j] = orderstoFill[i][j].toString();
             }
         }
-        const fill = await amm.fillOrder(_tokenA, _tokenB, solidityArray, {
-            gasLimit: 10000000,
-        });
+        const fill = await fillContract.fillOrder(
+            _tokenA,
+            _tokenB,
+            solidityArray,
+            {
+                gasLimit: 10000000,
+            }
+        );
         await fill.wait();
     } catch (error) {
         console.log(error);
@@ -437,7 +446,11 @@ async function matchSellOrders(_tokenA, _tokenB, _id) {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const signer = provider.getSigner();
     const exchange = new ethers.Contract(exchangeAddress, Exchange.abi, signer);
-    const amm = new ethers.Contract(ammAddress, AMM.abi, signer);
+    const fillContract = new ethers.Contract(
+        fillLogicAddress,
+        fillLogic.abi,
+        signer
+    );
 
     let saleTokenAmt;
     let orderstoFill = [];
@@ -517,9 +530,14 @@ async function matchSellOrders(_tokenA, _tokenB, _id) {
                 solidityArray[i][j] = orderstoFill[i][j].toString();
             }
         }
-        const fill = await amm.fillOrder(_tokenA, _tokenB, solidityArray, {
-            gasLimit: 10000000,
-        });
+        const fill = await fillContract.fillOrder(
+            _tokenA,
+            _tokenB,
+            solidityArray,
+            {
+                gasLimit: 10000000,
+            }
+        );
         await fill.wait();
     } catch (error) {
         console.log(error);

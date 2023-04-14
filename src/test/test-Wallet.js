@@ -22,7 +22,7 @@ describe("Wallet", async () => {
                 {
                     forking: {
                         jsonRpcUrl: GOERLI_RPC_URL,
-                        blockNumber: 8804292,
+                        blockNumber: 8826732,
                     },
                 },
             ],
@@ -31,7 +31,7 @@ describe("Wallet", async () => {
         await helpers.impersonateAccount(testwallet1);
         wallet1 = await ethers.getSigner(testwallet1);
 
-        walletAdd = "0xc1ee82417b4374d04451b67ce26a2cbe9647505e";
+        walletAdd = "0x11a6540e1357f29cbc9e04a6ac6893089899b6bd";
         walletContract = new ethers.Contract(walletAdd, Wallet.abi, wallet1);
 
         ethADD = "0x0000000000000000000000000000000000000000";

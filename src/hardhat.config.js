@@ -32,7 +32,7 @@ module.exports = {
                 blockConfirmations: 6,
                 gas: 2100000000,
                 gasPrice: 30000000000,
-                blockNumber: 8798758,
+                blockNumber: 8826732,
             },
         },
         goerli: {

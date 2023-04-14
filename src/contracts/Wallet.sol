@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 
 import "./ERC20.sol";
 import "./Exchange.sol";
-import "./AMM.sol";
+import "./fillLogic.sol";
 
 /// @notice Library SafeMath used to prevent overflows and underflows
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
@@ -27,7 +27,7 @@ contract Wallet is Ownable {
     mapping(address => mapping(address => uint256)) public lockedFunds;
 
     Exchange exchange;
-    AMM amm;
+    fillLogic fillContract;
     IERC20 token;
 
     event Deposit(address token, address user, uint256 amount, uint256 balance);
@@ -240,8 +240,8 @@ contract Wallet is Ownable {
         exchange = Exchange(_exchangeAddress);
     }
 
-    function updateAMMAddress(address _AMM) public onlyOwner {
-        amm = AMM(_AMM);
+    function updateFillLogicAddress(address _contract) public onlyOwner {
+        fillContract = fillLogic(_contract);
     }
 
     function updateaDaiAddress(address _address) public onlyOwner {
@@ -250,8 +250,9 @@ contract Wallet is Ownable {
 
     modifier isExchange() {
         require(
-            msg.sender == address(exchange) || msg.sender == address(amm),
-            "Not Exchange or AMM contract"
+            msg.sender == address(exchange) ||
+                msg.sender == address(fillContract),
+            "Not Exchange or fillOrder contract"
         );
         _;
     }

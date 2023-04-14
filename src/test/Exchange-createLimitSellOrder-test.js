@@ -38,7 +38,7 @@ describe("Exchange", async function () {
                 {
                     forking: {
                         jsonRpcUrl: GOERLI_RPC_URL,
-                        blockNumber: 8804292,
+                        blockNumber: 8826732,
                     },
                 },
             ],
@@ -48,7 +48,7 @@ describe("Exchange", async function () {
         wallet1 = await ethers.getSigner(testwallet1);
 
         //Wallet Contract
-        walletAdd = "0xc1ee82417b4374d04451b67ce26a2cbe9647505e";
+        walletAdd = "0x11a6540e1357f29cbc9e04a6ac6893089899b6bd";
         Wallet = new ethers.Contract(walletAdd, WalletABI.abi, wallet1);
 
         //Exchange Contract
